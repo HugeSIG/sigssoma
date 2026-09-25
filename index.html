@@ -2487,92 +2487,89 @@ if (publishForm) {
         if (submitBtn) submitBtn.innerText = "Subiendo archivo...";
 
         // 1. Capturar archivo del formulario
-        const fileInput = document.getElementById('publish-file') || document.getElementById('doc-file') || publishForm.querySelector('input[type="file"]');
-        const fileToUpload = (fileInput && fileInput.files && fileInput.files[0]) ? fileInput.files[0] : (typeof selectedDocumentFile !== 'undefined' ? selectedDocumentFile : null);
+        const submitBtn = publishForm.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn ? submitBtn.innerText : '';
+    if (submitBtn) submitBtn.innerText = "Subiendo archivo...";
 
-        if (!fileToUpload) {
-            alert("Atención: Selecciona un archivo (PDF, Word, Excel) antes de publicar.");
-            if (submitBtn) submitBtn.innerText = originalBtnText;
-            return;
-        }
+    // 1. Obtener archivo adjunto
+    const fileInput = document.getElementById('publish-file') || document.getElementById('doc-file') || publishForm.querySelector('input[type="file"]');
+    const fileToUpload = (fileInput && fileInput.files && fileInput.files[0]) ? fileInput.files[0] : (typeof selectedDocumentFile !== 'undefined' ? selectedDocumentFile : null);
 
-        // 2. Subida a Cloudinary
-        let fileUrl = '';
-        const formData = new FormData();
-        formData.append('file', fileToUpload);
-        formData.append('upload_preset', 'sigssomacloud');
+    if (!fileToUpload) {
+        alert("Selecciona un archivo (PDF, Word, Excel) antes de publicar.");
+        if (submitBtn) submitBtn.innerText = originalBtnText;
+        return;
+    }
 
-        try {
-            let response = await fetch('https://api.cloudinary.com/v1_1/dbgjg6uq/auto/upload', {
+    // 2. Subida a Cloudinary
+    let fileUrl = '';
+    const formData = new FormData();
+    formData.append('file', fileToUpload);
+    formData.append('upload_preset', 'sigssomacloud');
+
+    try {
+        let response = await fetch('https://api.cloudinary.com/v1_1/dbgjg6uq/auto/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        let data = await response.json();
+
+        if (!response.ok && data.error && data.error.message && data.error.message.includes('resource_type')) {
+            response = await fetch('https://api.cloudinary.com/v1_1/dbgjg6uq/raw/upload', {
                 method: 'POST',
                 body: formData
             });
+            data = await response.json();
+        }
 
-            let data = await response.json();
-
-            // Reintento para archivos de tipo RAW si la nube lo solicita
-            if (!response.ok && data.error && data.error.message && data.error.message.includes('resource_type')) {
-                response = await fetch('https://api.cloudinary.com/v1_1/dbgjg6uq/raw/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-                data = await response.json();
-            }
-
-            if (data.secure_url) {
-                fileUrl = data.secure_url;
-            } else {
-                const errorDetalle = data.error ? data.error.message : "Error desconocido en Cloudinary";
-                alert("ERROR DE CLOUDINARY: " + errorDetalle);
-                if (submitBtn) submitBtn.innerText = originalBtnText;
-                return;
-            }
-        } catch (err) {
-            alert("ERROR DE CONEXIÓN: " + err.message);
+        if (data.secure_url) {
+            fileUrl = data.secure_url;
+        } else {
+            alert("Cloudinary rechazó el archivo: " + (data.error?.message || "Error desconocido"));
             if (submitBtn) submitBtn.innerText = originalBtnText;
             return;
         }
-
-        // 3. Crear el documento e insertarlo en LocalStorage
-        const titleVal = (document.getElementById('publish-title') || document.getElementById('doc-title'))?.value || 'Documento Sin Título';
-        const typeVal = (document.getElementById('publish-type') || document.getElementById('doc-type'))?.value || 'Documento';
-        const codeVal = (document.getElementById('publish-code') || document.getElementById('doc-code'))?.value || ('GRA-SSO-' + Math.floor(1000 + Math.random() * 9000));
-
-        const newDoc = {
-            id: 'DOC-' + Date.now(),
-            title: titleVal,
-            type: typeVal,
-            code: codeVal,
-            url: fileUrl,
-            date: new Date().toISOString().split('T')[0],
-            spec: 'sso',
-            cat: 'planes',
-            format: 'PDF'
-        };
-
-        if (typeof documentsDB !== 'undefined') {
-            documentsDB.unshift(newDoc);
-            localStorage.setItem('sigssoma_documents', JSON.stringify(documentsDB));
-        }
-
-        alert("¡Documento subido a la nube y publicado correctamente!");
+    } catch (err) {
+        alert("Error de conexión con Cloudinary: " + err.message);
         if (submitBtn) submitBtn.innerText = originalBtnText;
-        publishForm.reset();
-        
-        if (typeof closeModal === 'function') closeModal();
-        if (typeof renderDocuments === 'function') renderDocuments();
-    });
-}
-        
-        // --- RENDERIZADO DE LA PLANILLA / CALENDARIO CON CARITAS ---
-        function renderAttendanceCalendar() {
-            const grid = document.getElementById('attendance-calendar-grid');
-            const titleElem = document.getElementById('attendance-calendar-month-title');
-            if (!grid) return;
+        return;
+    }
 
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth();
+    // 3. Crear documento y guardar en LocalStorage
+    const titleVal = (document.getElementById('publish-title') || document.getElementById('doc-title'))?.value || 'Documento Sin Título';
+    const typeVal = (document.getElementById('publish-type') || document.getElementById('doc-type'))?.value || 'Documento';
+    const codeVal = (document.getElementById('publish-code') || document.getElementById('doc-code'))?.value || ('GRA-SSO-' + Math.floor(1000 + Math.random() * 9000));
+    const specVal = (document.getElementById('publish-spec') || document.getElementById('doc-spec'))?.value || 'sso';
+    const catVal = (document.getElementById('publish-cat') || document.getElementById('doc-cat'))?.value || 'planes';
+    const formatVal = (document.getElementById('publish-format') || document.getElementById('doc-format'))?.value || 'PDF';
+
+    const newDoc = {
+        id: 'DOC-' + Date.now(),
+        title: titleVal,
+        type: typeVal,
+        code: codeVal,
+        url: fileUrl,
+        spec: specVal,
+        cat: catVal,
+        format: formatVal,
+        date: new Date().toISOString().split('T')[0]
+    };
+
+    if (typeof documentsDB !== 'undefined') {
+        documentsDB.unshift(newDoc);
+        localStorage.setItem('sigssoma_documents', JSON.stringify(documentsDB));
+    }
+
+    alert("¡Documento guardado y publicado exitosamente!");
+    if (submitBtn) submitBtn.innerText = originalBtnText;
+    publishForm.reset();
+
+    if (typeof closeModal === 'function') closeModal();
+    if (typeof closeDocModal === 'function') closeDocModal();
+    if (typeof renderDocuments === 'function') renderDocuments();
+});
+}
 
             const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
             if (titleElem) titleElem.textContent = `${monthNames[month]} ${year} - ${currentUser ? (currentUser.obra || 'Obra Asignada') : ''}`;
