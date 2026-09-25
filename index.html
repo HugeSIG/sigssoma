@@ -2487,35 +2487,57 @@ if (publishForm) {
             return;
         }
 
-      const submitBtn = publishForm.querySelector('button[type="submit"]');
-const originalBtnText = submitBtn ? submitBtn.innerText : '';
-if (submitBtn) submitBtn.innerText = "Subiendo archivo...";
+    const submitBtn = publishForm.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn ? submitBtn.innerText : '';
+    if (submitBtn) submitBtn.innerText = "Subiendo archivo...";
 
-try {
-    const fileUrl = await uploadToCloudinary(selectedDocumentFile);
+    // 1. Obtener el archivo seleccionado
+    const fileInput = document.getElementById('publish-file') || document.getElementById('doc-file') || publishForm.querySelector('input[type="file"]');
+    const fileToUpload = (fileInput && fileInput.files && fileInput.files[0]) ? fileInput.files[0] : selectedDocumentFile;
 
-    if (!fileUrl) {
-        alert("Error: El archivo no se pudo subir a Cloudinary. Verifica la consola.");
+    if (!fileToUpload) {
+        alert("Atención: No has seleccionado ningún archivo PDF, Word o Excel.");
+        if (submitBtn) submitBtn.innerText = originalBtnText;
         return;
     }
-}
-        // Se usa 'auto/upload' para aceptar PDF, Word, Excel, etc.
-        const response = await fetch('https://api.cloudinary.com/v1_1/dbgjg6uq/auto/upload', {
+
+    // 2. Subir directamente a Cloudinary
+    let fileUrl = '#';
+    const formData = new FormData();
+    formData.append('file', fileToUpload);
+    formData.append('upload_preset', 'sigssomacloud');
+
+    try {
+        let response = await fetch('https://api.cloudinary.com/v1_1/dbgjg6uq/auto/upload', {
             method: 'POST',
             body: formData
         });
+        
+        let data = await response.json();
 
-        const data = await response.json();
+        // Intento secundario para formato de archivo RAW si Cloudinary lo exige
+        if (!response.ok && data.error && data.error.message && data.error.message.includes('resource_type')) {
+            response = await fetch('https://api.cloudinary.com/v1_1/dbgjg6uq/raw/upload', {
+                method: 'POST',
+                body: formData
+            });
+            data = await response.json();
+        }
 
-        if (!data.secure_url) {
-            console.error("Error devuelto por Cloudinary:", data);
-            alert("Cloudinary rechazó la subida: " + (data.error?.message || "Verifica la consola"));
+        if (data.secure_url) {
+            fileUrl = data.secure_url;
+            alert("¡ÉXITO! Archivo subido a la nube correctamente.\nURL: " + fileUrl);
+        } else {
+            const errorDetalle = data.error ? data.error.message : JSON.stringify(data);
+            alert("ERROR DE CLOUDINARY: " + errorDetalle);
             if (submitBtn) submitBtn.innerText = originalBtnText;
             return;
         }
-
-        const fileUrl = data.secure_url;
-
+    } catch (err) {
+        alert("ERROR DE CONEXIÓN A LA NUBE: " + err.message);
+        if (submitBtn) submitBtn.innerText = originalBtnText;
+        return;
+    }
          const newDoc = {
             id: 'DOC-' + Date.now(),
             title: (document.getElementById('publish-title') || document.getElementById('doc-title'))?.value || 'Documento Sin Título',
