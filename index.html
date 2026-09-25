@@ -2479,99 +2479,88 @@ document.addEventListener('drop', (e) => {
 const publishForm = document.getElementById('publish-doc-form');
 
 if (publishForm) {
-    publishForm.addEventListener('submit', async function(e) {
+    publishForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        if (!selectedDocumentFile) {
-            alert("Por favor, selecciona o arrastra un archivo antes de publicar.");
-            return;
-        }
+        const submitBtn = publishForm.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn ? submitBtn.innerText : '';
+        if (submitBtn) submitBtn.innerText = "Subiendo archivo...";
 
-    const submitBtn = publishForm.querySelector('button[type="submit"]');
-    const originalBtnText = submitBtn ? submitBtn.innerText : '';
-    if (submitBtn) submitBtn.innerText = "Subiendo archivo...";
+        // 1. Capturar archivo del formulario
+        const fileInput = document.getElementById('publish-file') || document.getElementById('doc-file') || publishForm.querySelector('input[type="file"]');
+        const fileToUpload = (fileInput && fileInput.files && fileInput.files[0]) ? fileInput.files[0] : (typeof selectedDocumentFile !== 'undefined' ? selectedDocumentFile : null);
 
-    // 1. Obtener el archivo seleccionado
-    const fileInput = document.getElementById('publish-file') || document.getElementById('doc-file') || publishForm.querySelector('input[type="file"]');
-    const fileToUpload = (fileInput && fileInput.files && fileInput.files[0]) ? fileInput.files[0] : selectedDocumentFile;
-
-    if (!fileToUpload) {
-        alert("Atención: No has seleccionado ningún archivo PDF, Word o Excel.");
-        if (submitBtn) submitBtn.innerText = originalBtnText;
-        return;
-    }
-
-    // 2. Subir directamente a Cloudinary
-    let fileUrl = '#';
-    const formData = new FormData();
-    formData.append('file', fileToUpload);
-    formData.append('upload_preset', 'sigssomacloud');
-
-    try {
-        let response = await fetch('https://api.cloudinary.com/v1_1/dbgjg6uq/auto/upload', {
-            method: 'POST',
-            body: formData
-        });
-        
-        let data = await response.json();
-
-        // Intento secundario para formato de archivo RAW si Cloudinary lo exige
-        if (!response.ok && data.error && data.error.message && data.error.message.includes('resource_type')) {
-            response = await fetch('https://api.cloudinary.com/v1_1/dbgjg6uq/raw/upload', {
-                method: 'POST',
-                body: formData
-            });
-            data = await response.json();
-        }
-
-        if (data.secure_url) {
-            fileUrl = data.secure_url;
-            alert("¡ÉXITO! Archivo subido a la nube correctamente.\nURL: " + fileUrl);
-        } else {
-            const errorDetalle = data.error ? data.error.message : JSON.stringify(data);
-            alert("ERROR DE CLOUDINARY: " + errorDetalle);
+        if (!fileToUpload) {
+            alert("Atención: Selecciona un archivo (PDF, Word, Excel) antes de publicar.");
             if (submitBtn) submitBtn.innerText = originalBtnText;
             return;
         }
-    } catch (err) {
-        alert("ERROR DE CONEXIÓN A LA NUBE: " + err.message);
-        if (submitBtn) submitBtn.innerText = originalBtnText;
-        return;
-    }
-         const newDoc = {
+
+        // 2. Subida a Cloudinary
+        let fileUrl = '';
+        const formData = new FormData();
+        formData.append('file', fileToUpload);
+        formData.append('upload_preset', 'sigssomacloud');
+
+        try {
+            let response = await fetch('https://api.cloudinary.com/v1_1/dbgjg6uq/auto/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            let data = await response.json();
+
+            // Reintento para archivos de tipo RAW si la nube lo solicita
+            if (!response.ok && data.error && data.error.message && data.error.message.includes('resource_type')) {
+                response = await fetch('https://api.cloudinary.com/v1_1/dbgjg6uq/raw/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                data = await response.json();
+            }
+
+            if (data.secure_url) {
+                fileUrl = data.secure_url;
+            } else {
+                const errorDetalle = data.error ? data.error.message : "Error desconocido en Cloudinary";
+                alert("ERROR DE CLOUDINARY: " + errorDetalle);
+                if (submitBtn) submitBtn.innerText = originalBtnText;
+                return;
+            }
+        } catch (err) {
+            alert("ERROR DE CONEXIÓN: " + err.message);
+            if (submitBtn) submitBtn.innerText = originalBtnText;
+            return;
+        }
+
+        // 3. Crear el documento e insertarlo en LocalStorage
+        const titleVal = (document.getElementById('publish-title') || document.getElementById('doc-title'))?.value || 'Documento Sin Título';
+        const typeVal = (document.getElementById('publish-type') || document.getElementById('doc-type'))?.value || 'Documento';
+        const codeVal = (document.getElementById('publish-code') || document.getElementById('doc-code'))?.value || ('GRA-SSO-' + Math.floor(1000 + Math.random() * 9000));
+
+        const newDoc = {
             id: 'DOC-' + Date.now(),
-            title: (document.getElementById('publish-title') || document.getElementById('doc-title'))?.value || 'Documento Sin Título',
-            type: (document.getElementById('publish-type') || document.getElementById('doc-type'))?.value || 'Documento',
-            code: (document.getElementById('publish-code') || document.getElementById('doc-code'))?.value || 'GRA-SSO-9859',
+            title: titleVal,
+            type: typeVal,
+            code: codeVal,
             url: fileUrl,
-            spec: (document.getElementById('publish-spec') || document.getElementById('doc-spec'))?.value || 'sso',
-            cat: (document.getElementById('publish-cat') || document.getElementById('doc-cat'))?.value || 'planes',
-            format: (document.getElementById('publish-format') || document.getElementById('doc-format'))?.value || 'PDF',
-            date: new Date().toISOString().split('T')[0]
+            date: new Date().toISOString().split('T')[0],
+            spec: 'sso',
+            cat: 'planes',
+            format: 'PDF'
         };
-if (typeof documentsDB !== 'undefined') {
+
+        if (typeof documentsDB !== 'undefined') {
             documentsDB.unshift(newDoc);
             localStorage.setItem('sigssoma_documents', JSON.stringify(documentsDB));
         }
 
-        selectedDocumentFile = null;
+        alert("¡Documento subido a la nube y publicado correctamente!");
+        if (submitBtn) submitBtn.innerText = originalBtnText;
+        publishForm.reset();
+        
+        if (typeof closeModal === 'function') closeModal();
         if (typeof renderDocuments === 'function') renderDocuments();
-
-        const dropzoneText = document.getElementById('dropzone-text');
-        if (dropzoneText) {
-            dropzoneText.innerText = "Arrastre el archivo aquí o haga clic para examinar";
-        }
-
-        alert("¡Documento publicado correctamente!");          
-            if (typeof renderDocuments === 'function') renderDocuments();
-            if (typeof closeDocModal === 'function') closeDocModal();
-
-        } catch (error) {
-            console.error("Error al publicar archivo:", error);
-            alert("Error en el proceso de publicación.");
-        } finally {
-            if (submitBtn) submitBtn.innerText = originalBtnText;
-        }
     });
 }
         
