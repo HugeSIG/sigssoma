@@ -2487,15 +2487,18 @@ if (publishForm) {
             return;
         }
 
-        const submitBtn = publishForm.querySelector('button[type="submit"]');
-        const originalBtnText = submitBtn ? submitBtn.innerText : '';
-        if (submitBtn) submitBtn.innerText = "Subiendo archivo...";
+      const submitBtn = publishForm.querySelector('button[type="submit"]');
+const originalBtnText = submitBtn ? submitBtn.innerText : '';
+if (submitBtn) submitBtn.innerText = "Subiendo archivo...";
 
-        try {
-        const formData = new FormData();
-        formData.append('file', selectedDocumentFile);
-        formData.append('upload_preset', 'sigssomacloud');
+try {
+    const fileUrl = await uploadToCloudinary(selectedDocumentFile);
 
+    if (!fileUrl) {
+        alert("Error: El archivo no se pudo subir a Cloudinary. Verifica la consola.");
+        return;
+    }
+}
         // Se usa 'auto/upload' para aceptar PDF, Word, Excel, etc.
         const response = await fetch('https://api.cloudinary.com/v1_1/dbgjg6uq/auto/upload', {
             method: 'POST',
