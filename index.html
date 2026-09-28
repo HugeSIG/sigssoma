@@ -2671,7 +2671,7 @@ function renderAttendanceCalendar() {
     if (!grid) return;
             
             const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-          if (titleElem) titleElem.textContent = `${monthNames[month]} ${year} -${currentUser ? (currentUser.obra || 'Obra Asignada') : ''}`;
+if (titleElem) titleElem.textContent = `${monthNames[month]} ${year} -${currentUser ? (currentUser.obra || 'Obra Asignada') : ''}`;
             const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
 
