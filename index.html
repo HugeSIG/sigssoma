@@ -1653,12 +1653,11 @@ function renderSubcategories(subcategories = []) {
   if (!container) return;
 
   container.innerHTML = subcategories.map(sub => `
-    <button onclick="filterBySubcategory('${sub.id}')" class="px-4 py-2 bg-gray-100 hover:bg-indigo-50 text-gray-700 rounded-lg text-sm font-medium transition">
+    <button data-id="${sub.id}" class="btn-subcat px-4 py-2 bg-gray-100 hover:bg-indigo-50 text-gray-700 rounded-lg text-sm font-medium transition">
       ${sub.name}
     </button>
   `).join('');
 }
-
 function renderDocuments(docs) {
   const container = document.getElementById('documents-grid');
   if (!container) return;
