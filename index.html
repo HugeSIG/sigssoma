@@ -1354,7 +1354,7 @@
 
                 <div class="pt-4 border-t border-white/10 flex justify-end gap-3">
                     <button type="button" onclick="closeDocModal()" class="px-4 py-2 bg-white/5 hover:bg-white/10 text-xs font-bold text-gray-300 rounded-xl">Cancelar</button>
-                    <button type="submit" class="btn-neon px-5 py-2 text-xs font-bold text-white rounded-xl">Publicar Archivo</button>
+                    <button type="button" onclick="subirArchivoLocal(event)" class="btn-neon px-5 py-2 text-xs font-bold text-white rounded-xl">Publicar Archivo</button>
                 </div>
             </form>
         </div>
@@ -3096,48 +3096,47 @@ function previewAttendancePhoto(event) {
             showNoticeModal("Reporte Generado", "Se ha exportado el reporte completo de asistencia de especialistas en formato Excel/PDF con datos de georreferenciación y marcación fotográfica.");
         }
 function subirArchivoLocal(event) {
-  if (event) event.preventDefault();
+    if (event) event.preventDefault();
 
-  // 1. Obtener los elementos del formulario
-  const fileInput = document.getElementById('archivoInput'); 
-  const titleInput = document.getElementById('documentTitle');
+    // Busca exactamente los IDs que están en tu HTML actual
+    const fileInput = document.getElementById('publish-file-input'); 
+    const titleInput = document.getElementById('modal-doc-title-input');
 
-  if (!fileInput || !fileInput.files[0]) {
-    alert("Por favor selecciona un archivo.");
-    return;
-  }
+    if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+        alert("Por favor selecciona o arrastra un archivo primero.");
+        return;
+    }
 
-  const file = fileInput.files[0];
-  const reader = new FileReader();
+    const file = fileInput.files[0];
+    const reader = new FileReader();
 
-  // 2. Convertir el archivo a Base64
-  reader.onload = function(e) {
-    const nuevoDocumento = {
-      id: Date.now(),
-      title: titleInput ? titleInput.value : file.name,
-      fileName: file.name,
-      fileData: e.target.result,
-      date: new Date().toLocaleDateString()
+    reader.onload = function(e) {
+        const nuevoDocumento = {
+            id: Date.now(),
+            title: titleInput && titleInput.value.trim() !== '' ? titleInput.value : file.name,
+            fileName: file.name,
+            fileData: e.target.result,
+            date: new Date().toLocaleDateString()
+        };
+
+        // Guardar en el almacenamiento local
+        let repos = JSON.parse(localStorage.getItem('sigssoma_repo_files')) || [];
+        repos.push(nuevoDocumento);
+        localStorage.setItem('sigssoma_repo_files', JSON.stringify(repos));
+
+        alert("¡Archivo guardado e integrado correctamente!");
+
+        // Limpiar inputs y cerrar el modal si la función existe
+        fileInput.value = '';
+        if (titleInput) titleInput.value = '';
+
+        if (typeof closeDocModal === 'function') closeDocModal();
+        if (typeof renderRepository === 'function') renderRepository();
+        if (typeof renderFiles === 'function') renderFiles();
     };
 
-    // 3. Guardar en memoria local del navegador
-    let repos = JSON.parse(localStorage.getItem('sigssoma_repo_files')) || [];
-    repos.push(nuevoDocumento);
-    localStorage.setItem('sigssoma_repo_files', JSON.stringify(repos));
-
-    alert("¡Archivo guardado e integrado correctamente!");
-
-    // 4. Limpiar campos y recargar la vista
-    fileInput.value = '';
-    if (titleInput) titleInput.value = '';
-
-    if (typeof renderRepository === 'function') renderRepository();
-    if (typeof renderFiles === 'function') renderFiles();
-  };
-
-  reader.readAsDataURL(file);
+    reader.readAsDataURL(file);
 }
-
 // Función para cambiar el texto al seleccionar archivo
 function handleFileSelect(event) {
     const fileInput = event.target;
