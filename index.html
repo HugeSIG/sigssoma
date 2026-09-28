@@ -3129,11 +3129,12 @@ function subirArchivoLocal(event) {
     // Si tienes una función para repintar la lista en pantalla, ejecútala aquí:
     if (typeof renderRepository === 'function') renderRepository();
     if (typeof renderFiles === 'function') renderFiles();
-  };
+};
 
-  reader.readAsDataURL(file);
+    reader.readAsDataURL(file);
+  }
 }
-    </script>
+</script>
     
 </body>
 </html>
