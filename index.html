@@ -3118,7 +3118,7 @@ function subirArchivoLocal(event) {
       fileName: file.name,
       fileData: e.target.result,
       date: new Date().toLocaleDateString()
-    }; // <-- AQUÍ FALTABA CERRAR LA LLAVE DEL OBJETO
+    };
 
     // 3. Guardar en memoria local del navegador
     let repos = JSON.parse(localStorage.getItem('sigssoma_repo_files')) || [];
@@ -3154,7 +3154,6 @@ function handleFileSelect(event) {
         }
     }
 }
-} // <-- ESTA LLAVE ES LA QUE FALTABA PARA CERRAR EL SCRIPT PRINCIPAL
 </script>
 </body>
 </html>
