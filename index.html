@@ -3123,16 +3123,16 @@ function subirArchivoLocal(event) {
     alert("¡Archivo guardado e integrado correctamente!");
 
     // 4. Limpiar campos y recargar la vista
-    fileInput.value = '';
-    if (titleInput) titleInput.value = '';
-    
-    // Si tienes una función para repintar la lista en pantalla, ejecútala aquí:
-    if (typeof renderRepository === 'function') renderRepository();
-    if (typeof renderFiles === 'function') renderFiles();
-};
+    // 4. Limpiar campos y recargar la vista
+        fileInput.value = '';
+        if (titleInput) titleInput.value = '';
+
+        // Si tienes una función para repintar la lista en pantalla, ejecútala aquí:
+        if (typeof renderRepository === 'function') renderRepository();
+        if (typeof renderFiles === 'function') renderFiles();
+    };
 
     reader.readAsDataURL(file);
-  }
 }
 </script>
     
