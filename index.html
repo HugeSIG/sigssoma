@@ -2642,9 +2642,9 @@ document.getElementById('form-doc').addEventListener('submit', async (e) => {
   
   const fileInput = document.getElementById('doc-file');
   
-// Leer archivo localmente sin llamar a servidores externos
-  const fileInput = document.querySelector('input[type="file"]') || document.getElementById('docFile');
+// Leer archivo localmente sin llamar a la nube
   let fileUrl = "";
+  const fileInput = document.getElementById('doc-file') || document.querySelector('input[type="file"]');
 
   if (fileInput && fileInput.files && fileInput.files[0]) {
     fileUrl = await new Promise((resolve) => {
@@ -2659,6 +2659,11 @@ document.getElementById('form-doc').addEventListener('submit', async (e) => {
     title: document.getElementById('doc-title') ? document.getElementById('doc-title').value : '',
     url: fileUrl
   };
+
+  documentsDB.push(newDoc);
+  localStorage.setItem('sigssoma_documents', JSON.stringify(documentsDB));
+  alert("¡Archivo subido y guardado con éxito!");
+});
 
   documentsDB.push(newDoc);
   localStorage.setItem('sigssoma_documents', JSON.stringify(documentsDB));
