@@ -3302,16 +3302,10 @@ container.innerHTML = itemsToRender.map(doc => `
     if (file) {
         if (labelTitle) labelTitle.textContent = "¡Archivo Seleccionado!";
         if (labelName) labelName.textContent = "📄 " + file.name + " (" + (file.size / (1024 * 1024)).toFixed(2) + " MB)";
-        if (uploadIcon) {
-            uploadIcon.className = "fas fa-file-alt text-green-400 text-3xl mb-2";
-        }
+ if (uploadIcon) {
+      uploadIcon.className = "fas fa-file-alt text-green-400 text-3xl mb-2";
     }
-        // Líneas finales reales del archivo (alrededor de la 3110)
-    if (typeof renderRepository === 'function') renderRepository();
-    if (typeof renderFiles === 'function') renderFiles();
-  };
-
-  reader.readAsDataURL(file);
+  }
 }
 </script>
 </body>
