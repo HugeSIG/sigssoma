@@ -3138,8 +3138,6 @@ date: new Date().toLocaleDateString()
 
   reader.readAsDataURL(file);
 } // <--- Cierra el reader/proceso del archivo
-} // <--- ¡AQUÍ ESTABA LA LLAVE QUE FALTABA PARA CERRAR LA FUNCIÓN PRINCIPAL!
-}
 // Función para cambiar el texto al seleccionar archivo
 function handleFileSelect(event) {
   const fileInput = event.target;
@@ -3155,16 +3153,6 @@ function handleFileSelect(event) {
       uploadIcon.className = "fas fa-file-alt text-green-400 text-3xl mb-2";
     }
   }
-}
-function closeSuccessModal() {
-    // Intenta ocultar los posibles IDs del modal de éxito
-    const successModal = document.getElementById('success-modal') || document.getElementById('modal-success');
-    if (successModal) {
-        successModal.classList.add('hidden');
-    } else {
-        // Si no encuentra el ID, recarga la página para cerrar cualquier modal
-        window.location.reload();
-    }
 }
     </script>
 </body>
