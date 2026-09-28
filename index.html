@@ -3292,17 +3292,20 @@ container.innerHTML = itemsToRender.map(doc => `
    // Lógica para guardar en storage local o enviar a Firebase
   console.log("Subiendo archivo...", currentFileBase64);
     
-    function handleFileSelect(event) {
-    const fileInput = event.target;
-    const file = fileInput ? fileInput.files[0] : null;
-    const labelTitle = document.getElementById('file-label-title');
-    const labelName = document.getElementById('file-label-name');
-    const uploadIcon = document.getElementById('upload-icon');
+}; 
+} 
 
-    if (file) {
-        if (labelTitle) labelTitle.textContent = "¡Archivo Seleccionado!";
-        if (labelName) labelName.textContent = "📄 " + file.name + " (" + (file.size / (1024 * 1024)).toFixed(2) + " MB)";
- if (uploadIcon) {
+function handleFileSelect(event) {
+  const fileInput = event.target;
+  const file = fileInput ? fileInput.files[0] : null;
+  const labelTitle = document.getElementById('file-label-title');
+  const labelName = document.getElementById('file-label-name');
+  const uploadIcon = document.getElementById('upload-icon');
+
+  if (file) {
+    if (labelTitle) labelTitle.textContent = "¡Archivo Seleccionado!";
+    if (labelName) labelName.textContent = "📄 " + file.name + " (" + (file.size / (1024 * 1024)).toFixed(2) + " MB)";
+    if (uploadIcon) {
       uploadIcon.className = "fas fa-file-alt text-green-400 text-3xl mb-2";
     }
   }
