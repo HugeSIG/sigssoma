@@ -2151,14 +2151,18 @@ function descargarArchivo(url) {
                     code: codeVal,
                     date: today,
                     desc: descVal
-                };
-                documentsDB.unshift(newDoc);
-                showNoticeModal("Documento Publicado", `El documento "${titleVal}" ha sido subido con éxito al repositorio.`);
-            }
+               };
+    
+    documentsDB.unshift(newDoc);
+    localStorage.setItem('sigssoma_docs', JSON.stringify(documentsDB)); // <-- LÍNEA NUEVA AQUÍ
 
-            closeDocModal();
-            renderDocuments();
-            renderAdminFilesTable();
+    showNoticeModal("Documento Publicado", `El documento "${titleVal}" ha sido subido con éxito al repositorio.`);
+  }
+
+  closeDocModal();
+  renderDocuments();
+  renderAdminFilesTable();
+}
         }
 
         function confirmDeleteDoc(id) {
