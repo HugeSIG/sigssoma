@@ -3095,10 +3095,11 @@ function previewAttendancePhoto(event) {
         function generateAttendanceReport() {
             showNoticeModal("Reporte Generado", "Se ha exportado el reporte completo de asistencia de especialistas en formato Excel/PDF con datos de georreferenciación y marcación fotográfica.");
         }
+<script>
+// Función para procesar y guardar el archivo
 function subirArchivoLocal(event) {
     if (event) event.preventDefault();
 
-    // Busca exactamente los IDs que están en tu HTML actual
     const fileInput = document.getElementById('publish-file-input'); 
     const titleInput = document.getElementById('modal-doc-title-input');
 
@@ -3113,20 +3114,18 @@ function subirArchivoLocal(event) {
     reader.onload = function(e) {
         const nuevoDocumento = {
             id: Date.now(),
-            title: titleInput && titleInput.value.trim() !== '' ? titleInput.value : file.name,
+            title: (titleInput && titleInput.value.trim() !== '') ? titleInput.value : file.name,
             fileName: file.name,
             fileData: e.target.result,
             date: new Date().toLocaleDateString()
         };
 
-        // Guardar en el almacenamiento local
         let repos = JSON.parse(localStorage.getItem('sigssoma_repo_files')) || [];
         repos.push(nuevoDocumento);
         localStorage.setItem('sigssoma_repo_files', JSON.stringify(repos));
 
         alert("¡Archivo guardado e integrado correctamente!");
 
-        // Limpiar inputs y cerrar el modal si la función existe
         fileInput.value = '';
         if (titleInput) titleInput.value = '';
 
@@ -3137,10 +3136,11 @@ function subirArchivoLocal(event) {
 
     reader.readAsDataURL(file);
 }
-// Función para cambiar el texto al seleccionar archivo
+
+// Función para actualizar el texto al seleccionar archivo
 function handleFileSelect(event) {
     const fileInput = event.target;
-    const file = fileInput.files[0];
+    const file = fileInput ? fileInput.files[0] : null;
     const labelTitle = document.getElementById('file-label-title');
     const labelName = document.getElementById('file-label-name');
     const uploadIcon = document.getElementById('upload-icon');
