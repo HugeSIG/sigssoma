@@ -3289,8 +3289,8 @@ function renderDocuments() {
 }
    // Lógica para guardar en storage local o enviar a Firebase
   console.log("Subiendo archivo...", currentFileBase64);
-}
-            function handleFileSelect(event) {
+    
+    function handleFileSelect(event) {
     const fileInput = event.target;
     const file = fileInput ? fileInput.files[0] : null;
     const labelTitle = document.getElementById('file-label-title');
