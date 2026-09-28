@@ -3127,36 +3127,34 @@ function subirArchivoLocal(event) {
 
     alert("¡Archivo guardado e integrado correctamente!");
 
-    // 4. Limpiar campos y recargar la vista
-    // 4. Limpiar campos y recargar la vista
+   // 4. Limpiar campos y recargar la vista
         fileInput.value = '';
         if (titleInput) titleInput.value = '';
 
         // Si tienes una función para repintar la lista en pantalla, ejecútala aquí:
         if (typeof renderRepository === 'function') renderRepository();
         if (typeof renderFiles === 'function') renderFiles();
-  };
+    };
 
-            reader.readAsDataURL(file);
+    reader.readAsDataURL(file);
+}
+
+// Función para cambiar el texto al seleccionar archivo
+function handleFileSelect(event) {
+    const fileInput = event.target;
+    const file = fileInput.files[0];
+    const labelTitle = document.getElementById('file-label-title');
+    const labelName = document.getElementById('file-label-name');
+    const uploadIcon = document.getElementById('upload-icon');
+
+    if (file) {
+        if (labelTitle) labelTitle.textContent = "¡Archivo Seleccionado!";
+        if (labelName) labelName.textContent = `📄 ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+        if (uploadIcon) {
+            uploadIcon.className = "fas fa-file-alt text-green-400 text-3xl mb-2";
         }
-
-        // Función para cambiar el texto al seleccionar archivo
-        function handleFileSelect(event) {
-            const fileInput = event.target;
-            const file = fileInput.files[0];
-            const labelTitle = document.getElementById('file-label-title');
-            const labelName = document.getElementById('file-label-name');
-            const uploadIcon = document.getElementById('upload-icon');
-
-            if (file) {
-                if (labelTitle) labelTitle.textContent = "¡Archivo Seleccionado!";
-                if (labelName) labelName.textContent = `📄 ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
-                if (uploadIcon) {
-                    uploadIcon.className = "fas fa-file-alt text-green-400 text-3xl mb-2";
-                }
-            }
-        }
-    </script>
+    }
+}
+</script>
 </body>
 </html>
- 
