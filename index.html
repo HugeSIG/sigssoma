@@ -3159,8 +3159,7 @@ function previewAttendancePhoto(event) {
 
         reader.readAsDataURL(file);
     }
-
-let currentFileBase64 = null;
+var currentFileBase64 = currentFileBase64 || null;
 
 function handleFileSelect(event) {
   const file = event.target.files ? event.target.files[0] : event.dataTransfer.files[0];
