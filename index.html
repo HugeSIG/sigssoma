@@ -1270,10 +1270,7 @@
                         </select>
                     </div>
                 </div>
-
-                <div class="pt-4 border-t border-white/10 flex justify-end gap-3">
-                   <button type="button" onclick="document.getElementById('modal-notice').classList.add('hidden')" class="btn-neon px-6 py-2.5 text-xs font-bold text-white rounded-xl bg-red-600 hover:bg-red-700 transition">Entendido</button>
-                    <button type="submit" class="btn-neon px-5 py-2 text-xs font-bold text-white rounded-xl">Guardar Usuario</button>
+                <button type="submit" class="btn-neon px-5 py-2 text-xs font-bold text-white rounded-xl">Guardar Usuario</button>
                 </div>
             </form>
         </div>
@@ -1388,7 +1385,7 @@
             <p id="modal-notice-text" class="text-xs text-gray-300">Operación realizada con éxito.</p>
 
             <div class="pt-2">
-              <button type="button" onclick="document.getElementById('success-modal').classList.add('hidden')" class="btn-neon px-6 py-2.5 text-xs font-bold text-white rounded-xl bg-red-600 hover:bg-red-700 transition">Entendido</button>
+            <button type="button" onclick="document.getElementById('modal-notice').classList.add('hidden')" class="btn-neon px-6 py-2.5 text-xs font-bold text-white rounded-xl bg-red-600 hover:bg-red-700 transition">Entendido</button> 
             </div>
         </div>
     </div>
@@ -1601,7 +1598,7 @@ documentsDB = documentsDB.map(doc => {
                     const dniUser = user.email.split('@')[0];
 
                     // 👈 AQUÍ AGREGAS LOS DNI O USUARIOS QUE SERÁN ADMINISTRADORES:
-                    const ADMIN_DNIS = ['admin', '44270624', '44270624']; 
+                    const ADMIN_DNIS = ['admin', '44270624'];
 
                     const isAdmin = ADMIN_DNIS.includes(dniUser.toLowerCase());
 
@@ -3220,12 +3217,74 @@ function renderDocuments(docs = []) {
     </div>
   `).join('');
 }
+// Funciones faltantes para renderizado de subcategorías y documentos
+function renderSubcategories() {
+    const container = document.getElementById('sidebar-categories');
+    if (!container) return;
 
-// --- Cierre correcto de etiquetas ---
-</script>
-</body>
-</html>
-    // Lógica para guardar en storage local o enviar a Firebase
+    const categories = [
+        { id: 'all', name: 'Todos los Archivos', icon: 'fa-folder' },
+        { id: 'normativas', name: 'Normativas & Leyes', icon: 'fa-balance-scale' },
+        { id: 'formatos', name: 'Formatos Oficiales', icon: 'fa-file-alt' },
+        { id: 'planes', name: 'Planes e IPERC / PMA', icon: 'fa-shield-alt' },
+        { id: 'monitoreo', name: 'Monitoreo & Informes', icon: 'fa-chart-line' }
+    ];
+
+    container.innerHTML = categories.map(cat => `
+        <button onclick="filterByCategory('${cat.id}')" class="w-full text-left px-3 py-2 rounded-xl ${currentCategory === cat.id ? 'bg-red-600/30 text-red-400 font-bold border border-red-500/30' : 'text-gray-300 hover:bg-white/5'} text-xs flex items-center gap-2 transition">
+            <i class="fas ${cat.icon} text-xs"></i>
+            <span>${cat.name}</span>
+        </button>
+    `).join('');
+}
+
+function filterByCategory(catId) {
+    currentCategory = catId;
+    renderSubcategories();
+    renderDocuments();
+}
+
+function renderDocuments() {
+    const container = document.getElementById('documents-grid');
+    if (!container) return;
+
+    let filteredDocs = documentsDB.filter(doc => doc.spec === currentSpecialty);
+    
+    if (currentCategory !== 'all') {
+        filteredDocs = filteredDocs.filter(doc => doc.cat === currentCategory);
+    }
+
+    const countBadge = document.getElementById('doc-count-badge');
+    if (countBadge) countBadge.textContent = `${filteredDocs.length} Archivos`;
+
+    if (filteredDocs.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full text-center py-12 glass-panel rounded-2xl">
+                <i class="fas fa-folder-open text-4xl text-gray-600 mb-3"></i>
+                <p class="text-sm font-semibold text-gray-400">No se encontraron documentos en esta categoría.</p>
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = filteredDocs.map(doc => `
+        <div class="glass-card p-4 rounded-2xl flex flex-col justify-between gap-3">
+            <div>
+                <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${doc.format === 'PDF' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : doc.format === 'EXCEL' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'}">${doc.format}</span>
+                    <span class="text-[10px] font-mono text-gray-400">${doc.code || 'SIN CÓDIGO'}</span>
+                </div>
+                <h4 class="text-xs font-bold text-white line-clamp-2">${doc.title}</h4>
+                <p class="text-[10px] text-gray-400 mt-1"><i class="far fa-calendar-alt mr-1"></i>${doc.date}</p>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-white/5">
+                <a href="${doc.url}" target="_blank" rel="noopener noreferrer" class="btn-neon text-[11px] font-bold px-3 py-1.5 rounded-lg text-white flex items-center gap-1">
+                    <i class="fas fa-download"></i> Descargar
+                </a>
+            </div>
+        </div>
+    `).join('');
+}
+   // Lógica para guardar en storage local o enviar a Firebase
   console.log("Subiendo archivo...", currentFileBase64);
 }
             function handleFileSelect(event) {
