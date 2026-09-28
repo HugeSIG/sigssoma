@@ -3198,7 +3198,7 @@ function subirArchivoLocal(event) {
         }
     }
 }
-            // --- Completa la función que se cortó en el renderizado de subcategorías ---
+      // --- Corrección del corte en renderSubcategories ---
 function renderSubcategories(subcategories) {
   const container = document.getElementById('subcategories-container');
   if (!container) return;
@@ -3210,7 +3210,7 @@ function renderSubcategories(subcategories) {
   `).join('');
 }
 
-// --- Motor de renderizado de Tarjetas de Documentos ---
+// --- Renderizado de tarjetas de documentos ---
 function renderDocuments(docs) {
   const container = document.getElementById('documents-grid');
   if (!container) return;
@@ -3236,7 +3236,7 @@ function renderDocuments(docs) {
   `).join('');
 }
 
-// --- Corrección de Gestión de Modales ---
+// --- Corrección de Modales ---
 function closeModalUser() {
   const modal = document.getElementById('modal-user');
   if (modal) modal.classList.add('hidden');
@@ -3262,7 +3262,7 @@ function handleFileSelect(event) {
   reader.readAsDataURL(file);
 }
 
-// --- Motor de Marcaciones y Asistencia ---
+// --- Módulo de Asistencia y Calendario ---
 function renderAttendanceRecord(records = []) {
   const totalElem = document.getElementById('kpi-total-marcaciones');
   if (totalElem) {
@@ -3291,7 +3291,7 @@ function renderAttendanceAdminDashboard(data = []) {
   renderAttendanceCalendar(now.getFullYear(), now.getMonth());
 }
 
-// --- Inicialización al cargar el DOM ---
+// --- Cierre correcto del script y DOM ---
 document.addEventListener('DOMContentLoaded', () => {
   renderAttendanceAdminDashboard();
 });
