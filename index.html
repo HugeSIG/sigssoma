@@ -2663,16 +2663,16 @@ document.getElementById('form-doc').addEventListener('submit', async (e) => {
 documentsDB.push(newDoc);
   localStorage.setItem('sigssoma_documents', JSON.stringify(documentsDB));
   alert("¡Archivo subido y guardado con éxito!");
-});
+}});
 
 function renderAttendanceCalendar() {
   const grid = document.getElementById('attendance-calendar-grid');
-    const titleElem = document.getElementById('attendance-calendar-month-title');
-    if (!grid) return;
-            
-            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-if (titleElem) titleElem.textContent = `${monthNames[month]} ${year} -${currentUser ? (currentUser.obra || 'Obra Asignada') : ''}`;
-            const firstDay = new Date(year, month, 1);
+  const titleElem = document.getElementById('attendance-calendar-month-title');
+  if (!grid) return;
+
+  const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+  if (titleElem) titleElem.textContent = `${monthNames[month]} ${year} - ${currentUser ? (currentUser.obra || 'Obra Asignada') : ''}`;
+  const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
 
             let startingDay = firstDay.getDay() - 1; // Ajustar a Lunes = 0
