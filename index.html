@@ -2642,15 +2642,15 @@ document.getElementById('form-doc').addEventListener('submit', async (e) => {
   
   const fileInput = document.getElementById('doc-file');
   
-// Leer archivo localmente utilizando una variable única
+// Leer archivo localmente sin duplicar variables
   let fileUrl = "";
-  const docFileInput = document.getElementById('doc-file') || document.querySelector('input[type="file"]');
+  const selectedDocFile = document.getElementById('doc-file') || document.querySelector('input[type="file"]');
 
-  if (docFileInput && docFileInput.files && docFileInput.files[0]) {
+  if (selectedDocFile && selectedDocFile.files && selectedDocFile.files[0]) {
     fileUrl = await new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => resolve(e.target.result);
-      reader.readAsDataURL(docFileInput.files[0]);
+      reader.readAsDataURL(selectedDocFile.files[0]);
     });
   }
 
@@ -2660,6 +2660,10 @@ document.getElementById('form-doc').addEventListener('submit', async (e) => {
     url: fileUrl
   };
 
+  documentsDB.push(newDoc);
+  localStorage.setItem('sigssoma_documents', JSON.stringify(documentsDB));
+  alert("¡Archivo subido y guardado con éxito!");
+});
   documentsDB.push(newDoc);
   localStorage.setItem('sigssoma_documents', JSON.stringify(documentsDB));
   alert("¡Archivo subido y guardado con éxito!");
