@@ -3129,22 +3129,21 @@ function previewAttendancePhoto(event) {
 
         reader.readAsDataURL(file);
     }
+function handleFileSelect(event) {
+    const fileInput = event.target;
+    const file = fileInput ? fileInput.files[0] : null;
+    const labelTitle = document.getElementById('file-label-title');
+    const labelName = document.getElementById('file-label-name');
+    const uploadIcon = document.getElementById('upload-icon');
 
-    function handleFileSelect(event) {
-        const fileInput = event.target;
-        const file = fileInput ? fileInput.files[0] : null;
-        const labelTitle = document.getElementById('file-label-title');
-        const labelName = document.getElementById('file-label-name');
-        const uploadIcon = document.getElementById('upload-icon');
-
-        if (file) {
-            if (labelTitle) labelTitle.textContent = "¡Archivo Seleccionado!";
-            if (labelName) labelName.textContent = `📄 ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
-            if (uploadIcon) {
-                uploadIcon.className = "fas fa-file-alt text-green-400 text-3xl mb-2";
-            }
+    if (file) {
+        if (labelTitle) labelTitle.textContent = "¡Archivo Seleccionado!";
+        if (labelName) labelName.textContent = "📄 " + file.name + " (" + (file.size / (1024 * 1024)).toFixed(2) + " MB)";
+        if (uploadIcon) {
+            uploadIcon.className = "fas fa-file-alt text-green-400 text-3xl mb-2";
         }
     }
+}
 </script>
 </body>
 </html>
