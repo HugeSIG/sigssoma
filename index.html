@@ -3198,18 +3198,7 @@ function subirArchivoLocal(event) {
     }
 }
      // --- Corrección del corte en renderSubcategories ---
-function renderSubcategories(subcategories) {
-  const container = document.getElementById('subcategories-container');
-  if (!container) return;
-
-  container.innerHTML = subcategories.map(sub => `
-    <button onclick="filterBySubcategory('${sub.id}')" class="px-4 py-2 bg-gray-100 hover:bg-indigo-50 text-gray-700 rounded-lg text-sm font-medium transition">
-      ${sub.name}
-    </button>
-  `).join('');
-}
-
-// --- Renderizado de subcategorías ---
+// --- Subcategories Render ---
 function renderSubcategories(subcategories = []) {
   const container = document.getElementById('subcategories-container');
   if (!container) return;
@@ -3221,7 +3210,7 @@ function renderSubcategories(subcategories = []) {
   `).join('');
 }
 
-// --- Renderizado de tarjetas de documentos ---
+// --- Documents Render ---
 function renderDocuments(docs) {
   const container = document.getElementById('documents-grid');
   if (!container) return;
@@ -3247,7 +3236,7 @@ function renderDocuments(docs) {
   `).join('');
 }
 
-// --- Corrección de Modales ---
+// --- Modals Close ---
 function closeModalUser() {
   const modal = document.getElementById('modal-user');
   if (modal) modal.classList.add('hidden');
@@ -3258,7 +3247,7 @@ function closeModalNotice() {
   if (modal) modal.classList.add('hidden');
 }
 
-// --- Manejador de Archivos ---
+// --- File Handler ---
 window.currentFileBase64 = window.currentFileBase64 || null;
 
 function handleFileSelect(event) {
@@ -3273,7 +3262,7 @@ function handleFileSelect(event) {
   reader.readAsDataURL(file);
 }
 
-// --- Módulo de Asistencia y Calendario ---
+// --- Attendance & Calendar ---
 function renderAttendanceRecord(records = []) {
   const totalElem = document.getElementById('kpi-total-marcaciones');
   if (totalElem) {
@@ -3302,7 +3291,7 @@ function renderAttendanceAdminDashboard(data = []) {
   renderAttendanceCalendar(now.getFullYear(), now.getMonth());
 }
 
-// --- Cierre correcto del script ---
+// --- Script Close ---
 document.addEventListener('DOMContentLoaded', () => {
   renderAttendanceAdminDashboard();
 });
