@@ -1643,84 +1643,12 @@ documentsDB = documentsDB.map(doc => {
 
             loginSuccess(foundUser);
         }
-
-        // Función principal del botón "Ingresar al Sistema"
-        // Función principal del botón "Ingresar al Sistema"
-        async function handleLoginSubmit(e) {
-            if (e) e.preventDefault();
-            const userVal = document.getElementById('login-username').value.trim();
-            const passVal = document.getElementById('login-password').value.trim();
-            const errorBox = document.getElementById('login-error-msg');
-            const errorText = document.getElementById('login-error-text');
-
-            if (!userVal || !passVal) {
-                if (errorText) errorText.textContent = "Por favor ingrese su DNI / Usuario y contraseña.";
-                if (errorBox) errorBox.classList.remove('hidden');
-                return;
-            }
-
-            // Si ingresan DNI numérico, le añade internamente @sigssoma.local para Firebase
-            const firebaseEmail = userVal.includes('@') ? userVal : `${userVal}@sigssoma.local`;
-
-            // 1. Intentar autenticación con Firebase Auth
-           if (window.firebaseAuth) {
-  try {
-    const userCredential = await window.signInWithEmailAndPassword(window.firebaseAuth, firebaseEmail, passVal);
-    const user = userCredential.user;
-
-    const dniUser = user.email.split('@')[0];
-
-    const userData = {
-      username: dniUser,
-      fullname: `Especialista DNI: ${dniUser}`,
-      role: 'Especialista SSO',
-      obra: 'Sede Central GRA Ayacucho',
-      status: 'activo'
-    };
-
-    loginSuccess(userData);
-  } catch (firebaseErr) {
-    console.warn("Firebase Auth falló, usando autenticación local:", firebaseErr);
-    // Verificar autenticación local
-    const localUser = usersDB.find(u => u.username === userVal && u.password === passVal);
-    if (localUser) {
-      loginSuccess(localUser); // <-- CAMBIAR showApp() POR loginSuccess(localUser)
-    } else {
-      alert("Credenciales incorrectas.");
-    }
-  }
-}
-
-            // 2. Respaldo local para cuentas de prueba (admin, jramirez, mvasquez)
-            const foundUser = usersDB.find(u => u.username.toLowerCase() === userVal.toLowerCase() && u.password === passVal);
-
-            if (!foundUser) {
-                if (errorText) errorText.textContent = "Acceso Denegado: DNI / Usuario o contraseña incorrectos.";
-                if (errorBox) errorBox.classList.remove('hidden');
-                return;
-            }
-
-            if (!ALLOWED_ROLES.includes(foundUser.role)) {
-                if (errorText) errorText.textContent = "Acceso Denegado: Su usuario no cuenta con un rol permitido.";
-                if (errorBox) errorBox.classList.remove('hidden');
-                return;
-            }
-
-            if (foundUser.status !== 'activo') {
-                if (errorText) errorText.textContent = "Acceso Restringido: Cuenta inhabilitada por el Administrador.";
-                if (errorBox) errorBox.classList.remove('hidden');
-                return;
-            }
-
-            loginSuccess(foundUser);
-        }
-                  
+                        
         function handleLogout() {
             currentUser = null;
             switchView('view-login');
         }
 
-        // --- MAIN TABS & SPECIALTY CONTROLLER ---
       // --- MAIN TABS & SPECIALTY CONTROLLER ---
         function switchMainTab(tab) {
             currentMainTab = tab;
