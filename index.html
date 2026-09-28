@@ -1405,29 +1405,36 @@
             <div id="modal-attendance-photo-desc" class="p-3 bg-black/40 rounded-xl border border-white/10 text-xs text-gray-300"></div>
         </div>
     </div>
-<!-- FIREBASE INITIALIZATION & AUTH -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAHl9f6orgMFkBgBuk5gZ21vABtmvdFJgk",
-            authDomain: "sigssoma-62daa.firebaseapp.com",
-            projectId: "sigssoma-62daa",
-            storageBucket: "sigssoma-62daa.firebasestorage.app",
-            messagingSenderId: "621311708976",
-            appId: "1:621311708976:web:9dc2fe0b1208029c4402f5",
-            measurementId: "G-3Q5L7CM9T1"
-        };
+    <!-- FIREBASE INITIALIZATION & AUTH -->
+   <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  // 1. LÍNEA A AGREGAR (Importar el módulo de almacenamiento en la nube)
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const auth = getAuth(app);
+  const firebaseConfig = {
+    apiKey: "AiZaSyAH19f6orgMFkBgBuk5gZ21vABtmvdFJgk",
+    authDomain: "sigssoma-62daa.firebaseapp.com",
+    projectId: "sigssoma-62daa",
+    storageBucket: "sigssoma-62daa.firebasestorage.app",
+    messagingSenderId: "621311708976",
+    appId: "1:621311708976:web:9dc2fe0b1208029c4402f5",
+    measurementId: "G-3Q5L7CM9T1"
+  };
 
-        // Exportar al ámbito global de la ventana
-        window.firebaseAuth = auth;
-        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  // 2. LÍNEA A AGREGAR (Inicializar el servicio de almacenamiento)
+  const storage = getStorage(app);
+
+  // Si necesitas exportarlo al ámbito global de la ventana (window):
+  window.storage = storage;
+  window.ref = ref;
+  window.uploadBytes = uploadBytes;
+  window.getDownloadURL = getDownloadURL;
     </script>
     <script>
         // --- APPLICATION GLOBAL STATE ---
@@ -1649,27 +1656,34 @@ documentsDB = documentsDB.map(doc => {
             const firebaseEmail = userVal.includes('@') ? userVal : `${userVal}@sigssoma.local`;
 
             // 1. Intentar autenticación con Firebase Auth
-            if (window.firebaseAuth) {
-                try {
-                    const userCredential = await window.signInWithEmailAndPassword(window.firebaseAuth, firebaseEmail, passVal);
-                    const user = userCredential.user;
+           if (window.firebaseAuth) {
+  try {
+    const userCredential = await window.signInWithEmailAndPassword(window.firebaseAuth, firebaseEmail, passVal);
+    const user = userCredential.user;
 
-                    const dniUser = user.email.split('@')[0];
+    const dniUser = user.email.split('@')[0];
 
-                    const userData = {
-                        username: dniUser,
-                        fullname: `Especialista DNI: ${dniUser}`,
-                        role: 'Especialista SSO',
-                        obra: 'Sede Central GRA Ayacucho',
-                        status: 'activo'
-                    };
+    const userData = {
+      username: dniUser,
+      fullname: `Especialista DNI: ${dniUser}`,
+      role: 'Especialista SSO',
+      obra: 'Sede Central GRA Ayacucho',
+      status: 'activo'
+    };
 
-                    loginSuccess(userData);
-                    return;
-                } catch (firebaseErr) {
-                    console.warn("No se encontró en Firebase Auth, verificando usuarios locales...", firebaseErr);
-                }
-            }
+    loginSuccess(userData);
+  } catch (firebaseErr) {
+    console.warn("Firebase Auth falló, usando autenticación local:", firebaseErr);
+    // Verificar autenticación local
+    const localUser = usersDB.find(u => u.username === userVal && u.password === passVal);
+    if (localUser) {
+      currentUser = localUser;
+      showApp();
+    } else {
+      alert("Credenciales incorrectas.");
+    }
+  }
+}
 
             // 2. Respaldo local para cuentas de prueba (admin, jramirez, mvasquez)
             const foundUser = usersDB.find(u => u.username.toLowerCase() === userVal.toLowerCase() && u.password === passVal);
@@ -2565,6 +2579,51 @@ if (publishForm) {
     if (typeof renderDocuments === 'function') renderDocuments();
 });
 }
+async function uploadFileToCloud(fileInput, folder) {
+  const file = fileInput.files[0];
+  if (!file) return null;
+
+  // Crear una referencia única en la nube
+  const storageRef = ref(storage, `${folder}/${Date.now()}_${file.name}`);
+
+  try {
+    // Subir el archivo físicamente a la nube
+    const snapshot = await uploadBytes(storageRef, file);
+    
+    // Obtener la URL pública del archivo subido
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    return downloadURL;
+  } catch (error) {
+    console.error("Error al subir el archivo a la nube:", error);
+    throw error;
+  }
+}
+
+// Ejemplo de uso al enviar el formulario del documento:
+document.getElementById('form-doc').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const fileInput = document.getElementById('doc-file');
+  
+  try {
+    // 1. Sube el archivo a Firebase Storage
+    const cloudUrl = await uploadFileToCloud(fileInput, 'documentos');
+    
+    // 2. Guarda el objeto con la URL de la nube en la base de datos
+    const newDoc = {
+      code: document.getElementById('doc-code').value,
+      title: document.getElementById('doc-title').value,
+      url: cloudUrl // <--- Aquí va la URL devuelta por la nube
+    };
+    
+    documentsDB.push(newDoc);
+    localStorage.setItem('sigssoma_documents', JSON.stringify(documentsDB));
+    alert("Archivo subido con éxito a la nube.");
+  } catch (err) {
+    alert("No se pudo subir el archivo.");
+  }
+});
+        
         function renderAttendanceCalendar() {
     const grid = document.getElementById('attendance-calendar-grid');
     const titleElem = document.getElementById('attendance-calendar-month-title');
