@@ -3274,7 +3274,7 @@ container.innerHTML = itemsToRender.map(doc => `
   <div class="glass-panel p-4 rounded-xl border border-white/10 flex flex-col justify-between hover:border-red-500/50 transition">
     <div class="space-y-2">
       <div class="flex items-center justify-between">
-        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-red-600/20 text-red-400 border border-red-500/30">${doc.code || 'SIN CÓDIGO'}</span>
+       <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">${doc.format || 'PDF'}</span>
         <span class="text-[10px] font-semibold text-gray-400 uppercase">${doc.format || 'PDF'}</span>
       </div>
       <h4 class="text-sm font-bold text-white line-clamp-1">${doc.title}</h4>
