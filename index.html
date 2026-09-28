@@ -3117,43 +3117,44 @@ function subirArchivoLocal(event) {
       title: titleInput ? titleInput.value : file.name,
       fileName: file.name,
       fileData: e.target.result, // Archivo guardado
-      date: new Date().toLocaleDateString()
-    };
+date: new Date().toLocaleDateString()
+  };
 
-    // 3. Guardar en memoria local del navegador
-    let repos = JSON.parse(localStorage.getItem('sigssoma_repo_files')) || [];
-    repos.push(nuevoDocumento);
-    localStorage.setItem('sigssoma_repo_files', JSON.stringify(repos));
+  // 3. Guardar en memoria local del navegador
+  let repos = JSON.parse(localStorage.getItem('sigssoma_repo_files')) || [];
+  repos.push(nuevoDocumento);
+  localStorage.setItem('sigssoma_repo_files', JSON.stringify(repos));
 
-    alert("¡Archivo guardado e integrado correctamente!");
+  alert("¡Archivo guardado e integrado correctamente!");
 
-   // 4. Limpiar campos y recargar la vista
-        fileInput.value = '';
-        if (titleInput) titleInput.value = '';
+  // 4. Limpiar campos y recargar la vista
+  fileInput.value = '';
+  if (titleInput) titleInput.value = '';
 
-        // Si tienes una función para repintar la lista en pantalla, ejecútala aquí:
-        if (typeof renderRepository === 'function') renderRepository();
-        if (typeof renderFiles === 'function') renderFiles();
-    };
+  // Si tienes una función para repintar la lista en pantalla, ejecútala aquí:
+  if (typeof renderRepository === 'function') renderRepository();
+  if (typeof renderFiles === 'function') renderFiles();
+  };
 
-    reader.readAsDataURL(file);
-}
+  reader.readAsDataURL(file);
+} // <--- Cierra el reader/proceso del archivo
+} // <--- ¡AQUÍ ESTABA LA LLAVE QUE FALTABA PARA CERRAR LA FUNCIÓN PRINCIPAL!
 
 // Función para cambiar el texto al seleccionar archivo
 function handleFileSelect(event) {
-    const fileInput = event.target;
-    const file = fileInput.files[0];
-    const labelTitle = document.getElementById('file-label-title');
-    const labelName = document.getElementById('file-label-name');
-    const uploadIcon = document.getElementById('upload-icon');
+  const fileInput = event.target;
+  const file = fileInput.files[0];
+  const labelTitle = document.getElementById('file-label-title');
+  const labelName = document.getElementById('file-label-name');
+  const uploadIcon = document.getElementById('upload-icon');
 
-    if (file) {
-        if (labelTitle) labelTitle.textContent = "¡Archivo Seleccionado!";
-        if (labelName) labelName.textContent = `📄 ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
-        if (uploadIcon) {
-            uploadIcon.className = "fas fa-file-alt text-green-400 text-3xl mb-2";
-        }
+  if (file) {
+    if (labelTitle) labelTitle.textContent = "¡Archivo Seleccionado!";
+    if (labelName) labelName.textContent = `📄 ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+    if (uploadIcon) {
+      uploadIcon.className = "fas fa-file-alt text-green-400 text-3xl mb-2";
     }
+  }
 }
 </script>
 </body>
