@@ -1415,7 +1415,7 @@
   import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
   const firebaseConfig = {
-    apiKey: "AiZaSyAH19f6orgMFkBgBuk5gZ21vABtmvdFJgk",
+    apiKey: "AIzaSyAHl9f6orgMFkBgBuk5gZ21vABtmvdFJgk",
     authDomain: "sigssoma-62daa.firebaseapp.com",
     projectId: "sigssoma-62daa",
     storageBucket: "sigssoma-62daa.firebasestorage.app",
@@ -1679,8 +1679,7 @@ documentsDB = documentsDB.map(doc => {
     // Verificar autenticación local
     const localUser = usersDB.find(u => u.username === userVal && u.password === passVal);
     if (localUser) {
-      currentUser = localUser;
-      showApp();
+      loginSuccess(localUser); // <-- CAMBIAR showApp() POR loginSuccess(localUser)
     } else {
       alert("Credenciales incorrectas.");
     }
@@ -3069,36 +3068,34 @@ function previewAttendancePhoto(event) {
         function generateAttendanceReport() {
             showNoticeModal("Reporte Generado", "Se ha exportado el reporte completo de asistencia de especialistas en formato Excel/PDF con datos de georreferenciación y marcación fotográfica.");
         }
-  async function subirArchivo() {
-  // 1. Obtener el input donde el usuario selecciona el archivo
-  const fileInput = document.getElementById('archivoInput'); // <-- Cambia 'archivoInput' por el ID real de tu <input type="file">
-  
-  if (!fileInput || !fileInput.files[0]) {
-    alert("Por favor selecciona un archivo antes de subir.");
+async function subirArchivo() {
+  const fileInput = document.getElementById('archivoInput'); // Reemplaza con el ID de tu input
+  const file = fileInput.files[0];
+
+  if (!file) {
+    alert("Por favor selecciona un archivo.");
     return;
   }
 
-  const file = fileInput.files[0];
-
   try {
-    // 2. Crear la ruta de destino en Firebase Storage
+    // 1. Crear referencia en Firebase Storage
     const storageRef = window.storageRef(window.firebaseStorage, 'repositorio/' + file.name);
-
-    // 3. Subir el archivo a la nube
+    
+    // 2. Subir el archivo
     const snapshot = await window.uploadBytes(storageRef, file);
-
-    // 4. Obtener el enlace directo para descargarlo/verlo
+    
+    // 3. Obtener la URL pública del archivo en la nube
     const downloadURL = await window.getDownloadURL(snapshot.ref);
 
-    alert("¡Archivo subido exitosamente a la nube!");
-    console.log("URL guardada:", downloadURL);
+    alert("¡Archivo subido con éxito a la nube!");
+    console.log("URL del archivo:", downloadURL);
 
-    // OPCIONAL: Limpiar el input y cerrar modal
-    fileInput.value = '';
+    // Opcional: Guardar la URL en Firestore o recargar la lista
+    // guardarEnBaseDeDatos(file.name, downloadURL);
 
   } catch (error) {
-    console.error("Error exacto al subir:", error);
-    alert("Error al subir a la nube: " + error.message);
+    console.error("Error detallado al subir:", error);
+    alert("No se pudo subir el archivo. Detalle: " + error.message);
   }
 }
     </script>
