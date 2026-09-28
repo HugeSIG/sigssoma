@@ -3069,6 +3069,38 @@ function previewAttendancePhoto(event) {
         function generateAttendanceReport() {
             showNoticeModal("Reporte Generado", "Se ha exportado el reporte completo de asistencia de especialistas en formato Excel/PDF con datos de georreferenciación y marcación fotográfica.");
         }
+  async function subirArchivo() {
+  // 1. Obtener el input donde el usuario selecciona el archivo
+  const fileInput = document.getElementById('archivoInput'); // <-- Cambia 'archivoInput' por el ID real de tu <input type="file">
+  
+  if (!fileInput || !fileInput.files[0]) {
+    alert("Por favor selecciona un archivo antes de subir.");
+    return;
+  }
+
+  const file = fileInput.files[0];
+
+  try {
+    // 2. Crear la ruta de destino en Firebase Storage
+    const storageRef = window.storageRef(window.firebaseStorage, 'repositorio/' + file.name);
+
+    // 3. Subir el archivo a la nube
+    const snapshot = await window.uploadBytes(storageRef, file);
+
+    // 4. Obtener el enlace directo para descargarlo/verlo
+    const downloadURL = await window.getDownloadURL(snapshot.ref);
+
+    alert("¡Archivo subido exitosamente a la nube!");
+    console.log("URL guardada:", downloadURL);
+
+    // OPCIONAL: Limpiar el input y cerrar modal
+    fileInput.value = '';
+
+  } catch (error) {
+    console.error("Error exacto al subir:", error);
+    alert("Error al subir a la nube: " + error.message);
+  }
+}
     </script>
     
 </body>
