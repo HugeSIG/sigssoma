@@ -3077,80 +3077,74 @@ function previewAttendancePhoto(event) {
                 </div>
             `).join('');
         }
-
-        // Abrir Modal de Imagen de Evidencia
-        function openAttendancePhotoModal(imgUrl, name, subtitle, desc) {
-            document.getElementById('modal-attendance-photo-img').src = imgUrl;
-            document.getElementById('modal-attendance-photo-title').textContent = name;
-            document.getElementById('modal-attendance-photo-subtitle').textContent = subtitle;
-            document.getElementById('modal-attendance-photo-desc').textContent = desc;
-            document.getElementById('modal-attendance-photo').classList.remove('hidden');
-        }
-
-        function closeAttendancePhotoModal() {
-            document.getElementById('modal-attendance-photo').classList.add('hidden');
-        }
-
-        // Generación/Exportación de Reporte de Asistencia (Excel/PDF simulado)
-        function generateAttendanceReport() {
-            showNoticeModal("Reporte Generado", "Se ha exportado el reporte completo de asistencia de especialistas en formato Excel/PDF con datos de georreferenciación y marcación fotográfica.");
-        }
-
-function subirArchivoLocal(event) {
-    if (event) event.preventDefault();
-
-    const fileInput = document.getElementById('publish-file-input'); 
-    const titleInput = document.getElementById('modal-doc-title-input');
-
-    if (!fileInput || !fileInput.files || !fileInput.files[0]) {
-        alert("Por favor selecciona o arrastra un archivo primero.");
-        return;
+// Abrir Modal de Imagen de Evidencia
+    function openAttendancePhotoModal(imgUrl, name, subtitle, desc) {
+        document.getElementById('modal-attendance-photo-img').src = imgUrl;
+        document.getElementById('modal-attendance-photo-title').textContent = name;
+        document.getElementById('modal-attendance-photo-subtitle').textContent = subtitle;
+        document.getElementById('modal-attendance-photo-desc').textContent = desc;
+        document.getElementById('modal-attendance-photo').classList.remove('hidden');
     }
 
-    const file = fileInput.files[0];
-    const reader = new FileReader();
+    function closeAttendancePhotoModal() {
+        document.getElementById('modal-attendance-photo').classList.add('hidden');
+    }
 
-    reader.onload = function(e) {
-        const nuevoDocumento = {
-            id: Date.now(),
-            title: (titleInput && titleInput.value.trim() !== '') ? titleInput.value : file.name,
-            fileName: file.name,
-            fileData: e.target.result,
-            date: new Date().toLocaleDateString()
+    function subirArchivoLocal(event) {
+        if (event) event.preventDefault();
+
+        const fileInput = document.getElementById('publish-file-input'); 
+        const titleInput = document.getElementById('modal-doc-title-input');
+
+        if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+            alert("Por favor selecciona o arrastra un archivo primero.");
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const nuevoDocumento = {
+                id: Date.now(),
+                title: (titleInput && titleInput.value.trim() !== '') ? titleInput.value : file.name,
+                fileName: file.name,
+                fileData: e.target.result,
+                date: new Date().toLocaleDateString()
+            };
+
+            let repos = JSON.parse(localStorage.getItem('sigssoma_repo_files')) || [];
+            repos.push(nuevoDocumento);
+            localStorage.setItem('sigssoma_repo_files', JSON.stringify(repos));
+
+            alert("¡Archivo guardado e integrado correctamente!");
+
+            fileInput.value = '';
+            if (titleInput) titleInput.value = '';
+
+            if (typeof closeDocModal === 'function') closeDocModal();
+            if (typeof renderRepository === 'function') renderRepository();
+            if (typeof renderFiles === 'function') renderFiles();
         };
 
-        let repos = JSON.parse(localStorage.getItem('sigssoma_repo_files')) || [];
-        repos.push(nuevoDocumento);
-        localStorage.setItem('sigssoma_repo_files', JSON.stringify(repos));
+        reader.readAsDataURL(file);
+    }
 
-        alert("¡Archivo guardado e integrado correctamente!");
+    function handleFileSelect(event) {
+        const fileInput = event.target;
+        const file = fileInput ? fileInput.files[0] : null;
+        const labelTitle = document.getElementById('file-label-title');
+        const labelName = document.getElementById('file-label-name');
+        const uploadIcon = document.getElementById('upload-icon');
 
-        fileInput.value = '';
-        if (titleInput) titleInput.value = '';
-
-        if (typeof closeDocModal === 'function') closeDocModal();
-        if (typeof renderRepository === 'function') renderRepository();
-        if (typeof renderFiles === 'function') renderFiles();
-    };
-
-    reader.readAsDataURL(file);
-}
-
-function handleFileSelect(event) {
-    const fileInput = event.target;
-    const file = fileInput ? fileInput.files[0] : null;
-    const labelTitle = document.getElementById('file-label-title');
-    const labelName = document.getElementById('file-label-name');
-    const uploadIcon = document.getElementById('upload-icon');
-
-    if (file) {
-        if (labelTitle) labelTitle.textContent = "¡Archivo Seleccionado!";
-        if (labelName) labelName.textContent = `📄 ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
-        if (uploadIcon) {
-            uploadIcon.className = "fas fa-file-alt text-green-400 text-3xl mb-2";
+        if (file) {
+            if (labelTitle) labelTitle.textContent = "¡Archivo Seleccionado!";
+            if (labelName) labelName.textContent = `📄 ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+            if (uploadIcon) {
+                uploadIcon.className = "fas fa-file-alt text-green-400 text-3xl mb-2";
+            }
         }
     }
-}
 </script>
 </body>
 </html>
