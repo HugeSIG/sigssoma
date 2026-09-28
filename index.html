@@ -2376,25 +2376,42 @@ function exportAttendanceToExcel() {
 
     XLSX.writeFile(workbook, fileName);
 }
-  // para que no diga ok cuando sale error
-        async function handleFileUpload(event) {
-  event.preventDefault();
+ async function handleFileUpload(event) {
+  if (event) event.preventDefault();
 
-  try {
-    // 1. Intentar subir el archivo al almacenamiento (Firebase Storage / API)
-    await uploadFileToStorage(file);
+  const fileInput = document.querySelector('input[type="file"]');
+  const titleInput = document.querySelector('#modal-repo input[type="text"]') || document.querySelector('input[type="text"]');
 
-    // 2. Si fue exitoso, registrar en la base de datos y mostrar éxito
-    alert("Archivo subido con éxito");
-    renderFiles(); 
-
-  } catch (error) {
-    console.error("Error al subir:", error);
-    alert("No se pudo subir el archivo.");
-    return; // <-- IMPORTANTE: Detener la ejecución para que no ejecute el éxito
+  if (!fileInput || !fileInput.files[0]) {
+    alert("Por favor selecciona un archivo.");
+    return;
   }
-}
-// --- SUBIR ARCHIVO A LA NUBE (CLOUDINTARY) ---
+
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    const nuevoDoc = {
+      id: Date.now(),
+      title: titleInput ? titleInput.value : file.name,
+      fileName: file.name,
+      fileData: e.target.result,
+      date: new Date().toLocaleDateString()
+    };
+
+    let repo = JSON.parse(localStorage.getItem('sigssoma_repo') || '[]');
+    repo.push(nuevoDoc);
+    localStorage.setItem('sigssoma_repo', JSON.stringify(repo));
+
+    alert("¡Archivo subido con éxito!");
+    
+    fileInput.value = '';
+    if (typeof renderFiles === 'function') renderFiles();
+    else location.reload();
+  };
+
+  reader.readAsDataURL(file);
+}// --- SUBIR ARCHIVO A LA NUBE (CLOUDINTARY) ---
 async function uploadToCloudinary(file) {
     if (!file) return null;
 
