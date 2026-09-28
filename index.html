@@ -2565,6 +2565,11 @@ if (publishForm) {
     if (typeof renderDocuments === 'function') renderDocuments();
 });
 }
+        function renderAttendanceCalendar() {
+    const grid = document.getElementById('attendance-calendar-grid');
+    const titleElem = document.getElementById('attendance-calendar-month-title');
+    if (!grid) return;
+            
             const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
             if (titleElem) titleElem.textContent = `${monthNames[month]} ${year} - ${currentUser ? (currentUser.obra || 'Obra Asignada') : ''}`;
 
