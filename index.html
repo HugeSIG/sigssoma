@@ -1339,13 +1339,18 @@
                     <label class="block text-xs font-semibold text-gray-300 mb-1">Descripción Breve</label>
                     <textarea id="modal-doc-desc" rows="2" placeholder="Describa el objetivo o aplicación del documento..." class="w-full px-3.5 py-2.5 bg-black/50 border border-white/10 rounded-xl text-white text-xs focus:border-red-500"></textarea>
                 </div>
-
-               <div id="publish-dropzone" class="p-4 border-2 border-dashed border-white/15 rounded-xl text-center bg-black/20 cursor-pointer">
-    <input type="file" id="publish-file-input" class="hidden" accept=".pdf,.xlsx,.docx,.jpg,.png">
-    <i class="fas fa-cloud-upload-alt text-2xl text-red-500 mb-1"></i>
-    <p class="text-xs text-gray-300 font-semibold">Arrastre el archivo aquí o haga clic para examinar</p>
-    <p class="text-[10px] text-gray-500 mt-0.5">Soporta PDF, XLSX, DOCX (Máx. 25MB)</p>
+<!-- CORTAR / REEMPLAZAR DESDE AQUÍ -->
+<div id="drop-zone" class="relative border-2 border-dashed border-gray-600 hover:border-red-500 rounded-xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center">
+    <!-- Input invisible que cubre toda la caja para permitir clic y arrastrar -->
+    <input type="file" id="publish-file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="handleFileSelect(event)">
+    
+    <div class="pointer-events-none flex flex-col items-center">
+        <i class="fas fa-cloud-upload-alt text-red-500 text-3xl mb-2" id="upload-icon"></i>
+        <p class="text-sm font-semibold text-gray-200" id="file-label-title">Arrastre el archivo aquí o haga clic para examinar</p>
+        <p class="text-xs text-gray-400 mt-1" id="file-label-name">Soporta PDF, XLSX, DOCX (Máx. 25MB)</p>
+    </div>
 </div>
+<!-- HASTA AQUÍ -->
 
                 <div class="pt-4 border-t border-white/10 flex justify-end gap-3">
                     <button type="button" onclick="closeDocModal()" class="px-4 py-2 bg-white/5 hover:bg-white/10 text-xs font-bold text-gray-300 rounded-xl">Cancelar</button>
@@ -3134,7 +3139,25 @@ function subirArchivoLocal(event) {
 
     reader.readAsDataURL(file);
 }
-</script>
-    
+// ... otras funciones JavaScript que ya tienes ...
+
+        // Función para cambiar el texto al seleccionar archivo
+        function handleFileSelect(event) {
+            const fileInput = event.target;
+            const file = fileInput.files[0];
+            const labelTitle = document.getElementById('file-label-title');
+            const labelName = document.getElementById('file-label-name');
+            const uploadIcon = document.getElementById('upload-icon');
+
+            if (file) {
+                if (labelTitle) labelTitle.textContent = "¡Archivo Seleccionado!";
+                if (labelName) labelName.textContent = `📄 ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+                if (uploadIcon) {
+                    uploadIcon.className = "fas fa-file-alt text-green-400 text-3xl mb-2";
+                }
+            }
+            }
+    </script>
 </body>
 </html>
+ 
