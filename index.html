@@ -3274,7 +3274,7 @@ function renderDocuments() {
             <div>
                 <div class="flex items-center justify-between gap-2 mb-2">
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${doc.format === 'PDF' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : doc.format === 'EXCEL' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'}">${doc.format}</span>
-                    <span class="text-[10px] font-mono text-gray-400">${doc.code || 'SIN CÓDIGO'}</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
                 </div>
                 <h4 class="text-xs font-bold text-white line-clamp-2">${doc.title}</h4>
                 <p class="text-[10px] text-gray-400 mt-1"><i class="far fa-calendar-alt mr-1"></i>${doc.date}</p>
@@ -3304,8 +3304,6 @@ function renderDocuments() {
             uploadIcon.className = "fas fa-file-alt text-green-400 text-3xl mb-2";
         }
     }
-}
-  
 </script>
 </body>
 </html>
