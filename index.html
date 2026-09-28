@@ -3098,9 +3098,9 @@ function previewAttendancePhoto(event) {
 function subirArchivoLocal(event) {
   if (event) event.preventDefault();
 
-  // 1. Obtener los elementos del formulario (Asegúrate de que los IDs coincidan)
+  // 1. Obtener los elementos del formulario
   const fileInput = document.getElementById('archivoInput'); 
-  const titleInput = document.getElementById('documentTitle'); // O el ID del título si existe
+  const titleInput = document.getElementById('documentTitle');
 
   if (!fileInput || !fileInput.files[0]) {
     alert("Por favor selecciona un archivo.");
@@ -3110,30 +3110,29 @@ function subirArchivoLocal(event) {
   const file = fileInput.files[0];
   const reader = new FileReader();
 
-  // 2. Convertir el archivo a un formato legible por el navegador (Base64)
+  // 2. Convertir el archivo a Base64
   reader.onload = function(e) {
     const nuevoDocumento = {
       id: Date.now(),
       title: titleInput ? titleInput.value : file.name,
       fileName: file.name,
-      fileData: e.target.result, // Archivo guardado
-date: new Date().toLocaleDateString()
-  };
+      fileData: e.target.result,
+      date: new Date().toLocaleDateString()
+    }; // <-- AQUÍ FALTABA CERRAR LA LLAVE DEL OBJETO
 
-  // 3. Guardar en memoria local del navegador
-  let repos = JSON.parse(localStorage.getItem('sigssoma_repo_files')) || [];
-  repos.push(nuevoDocumento);
-  localStorage.setItem('sigssoma_repo_files', JSON.stringify(repos));
+    // 3. Guardar en memoria local del navegador
+    let repos = JSON.parse(localStorage.getItem('sigssoma_repo_files')) || [];
+    repos.push(nuevoDocumento);
+    localStorage.setItem('sigssoma_repo_files', JSON.stringify(repos));
 
-  alert("¡Archivo guardado e integrado correctamente!");
+    alert("¡Archivo guardado e integrado correctamente!");
 
-  // 4. Limpiar campos y recargar la vista
-  fileInput.value = '';
-  if (titleInput) titleInput.value = '';
+    // 4. Limpiar campos y recargar la vista
+    fileInput.value = '';
+    if (titleInput) titleInput.value = '';
 
-  // Si tienes una función para repintar la lista en pantalla, ejecútala aquí:
-  if (typeof renderRepository === 'function') renderRepository();
-  if (typeof renderFiles === 'function') renderFiles();
+    if (typeof renderRepository === 'function') renderRepository();
+    if (typeof renderFiles === 'function') renderFiles();
   };
 
   reader.readAsDataURL(file);
