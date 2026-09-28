@@ -3068,35 +3068,48 @@ function previewAttendancePhoto(event) {
         function generateAttendanceReport() {
             showNoticeModal("Reporte Generado", "Se ha exportado el reporte completo de asistencia de especialistas en formato Excel/PDF con datos de georreferenciación y marcación fotográfica.");
         }
-async function subirArchivo() {
-  const fileInput = document.getElementById('archivoInput'); // Reemplaza con el ID de tu input
-  const file = fileInput.files[0];
+function subirArchivoLocal(event) {
+  if (event) event.preventDefault();
 
-  if (!file) {
+  // 1. Obtener los elementos del formulario (Asegúrate de que los IDs coincidan)
+  const fileInput = document.getElementById('archivoInput'); 
+  const titleInput = document.getElementById('documentTitle'); // O el ID del título si existe
+
+  if (!fileInput || !fileInput.files[0]) {
     alert("Por favor selecciona un archivo.");
     return;
   }
 
-  try {
-    // 1. Crear referencia en Firebase Storage
-    const storageRef = window.storageRef(window.firebaseStorage, 'repositorio/' + file.name);
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+
+  // 2. Convertir el archivo a un formato legible por el navegador (Base64)
+  reader.onload = function(e) {
+    const nuevoDocumento = {
+      id: Date.now(),
+      title: titleInput ? titleInput.value : file.name,
+      fileName: file.name,
+      fileData: e.target.result, // Archivo guardado
+      date: new Date().toLocaleDateString()
+    };
+
+    // 3. Guardar en memoria local del navegador
+    let repos = JSON.parse(localStorage.getItem('sigssoma_repo_files')) || [];
+    repos.push(nuevoDocumento);
+    localStorage.setItem('sigssoma_repo_files', JSON.stringify(repos));
+
+    alert("¡Archivo guardado e integrado correctamente!");
+
+    // 4. Limpiar campos y recargar la vista
+    fileInput.value = '';
+    if (titleInput) titleInput.value = '';
     
-    // 2. Subir el archivo
-    const snapshot = await window.uploadBytes(storageRef, file);
-    
-    // 3. Obtener la URL pública del archivo en la nube
-    const downloadURL = await window.getDownloadURL(snapshot.ref);
+    // Si tienes una función para repintar la lista en pantalla, ejecútala aquí:
+    if (typeof renderRepository === 'function') renderRepository();
+    if (typeof renderFiles === 'function') renderFiles();
+  };
 
-    alert("¡Archivo subido con éxito a la nube!");
-    console.log("URL del archivo:", downloadURL);
-
-    // Opcional: Guardar la URL en Firestore o recargar la lista
-    // guardarEnBaseDeDatos(file.name, downloadURL);
-
-  } catch (error) {
-    console.error("Error detallado al subir:", error);
-    alert("No se pudo subir el archivo. Detalle: " + error.message);
-  }
+  reader.readAsDataURL(file);
 }
     </script>
     
