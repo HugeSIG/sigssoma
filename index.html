@@ -1351,7 +1351,7 @@
 
                 <div class="pt-4 border-t border-white/10 flex justify-end gap-3">
                     <button type="button" onclick="closeDocModal()" class="px-4 py-2 bg-white/5 hover:bg-white/10 text-xs font-bold text-gray-300 rounded-xl">Cancelar</button>
-                    <button type="button" onclick="subirArchivoLocal(event)" class="btn-neon px-5 py-2 text-xs font-bold text-white rounded-xl">Publicar Archivo</button>
+                  <button type="button" onclick="saveDocSubmit(event)" class="btn-neon px-5 py-2 text-xs font-bold text-white rounded-xl">Publicar Archivo</button>
                 </div>
             </form>
         </div>
@@ -3124,7 +3124,7 @@ function previewAttendancePhoto(event) {
         document.getElementById('modal-attendance-photo').classList.add('hidden');
     }
 
-    function subirArchivoLocal(event) {
+    function saveDocSubmit(event) {
         if (event) event.preventDefault();
 
         const fileInput = document.getElementById('publish-file-input'); 
