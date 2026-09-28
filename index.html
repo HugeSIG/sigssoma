@@ -3156,6 +3156,16 @@ function handleFileSelect(event) {
     }
   }
 }
-</script>
+function closeSuccessModal() {
+    // Intenta ocultar los posibles IDs del modal de éxito
+    const successModal = document.getElementById('success-modal') || document.getElementById('modal-success');
+    if (successModal) {
+        successModal.classList.add('hidden');
+    } else {
+        // Si no encuentra el ID, recarga la página para cerrar cualquier modal
+        window.location.reload();
+    }
+}
+    </script>
 </body>
 </html>
