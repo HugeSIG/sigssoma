@@ -2487,7 +2487,7 @@ if (publishForm) {
         if (submitBtn) submitBtn.innerText = "Subiendo archivo...";
 
         // 1. Capturar archivo del formulario
-        const submitBtn = publishForm.querySelector('button[type="submit"]');
+       const submitBtn = publishForm.querySelector('button[type="submit"]');
     const originalBtnText = submitBtn ? submitBtn.innerText : '';
     if (submitBtn) submitBtn.innerText = "Subiendo archivo...";
 
@@ -2570,7 +2570,6 @@ if (publishForm) {
     if (typeof renderDocuments === 'function') renderDocuments();
 });
 }
-
             const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
             if (titleElem) titleElem.textContent = `${monthNames[month]} ${year} - ${currentUser ? (currentUser.obra || 'Obra Asignada') : ''}`;
 
