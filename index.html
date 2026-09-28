@@ -2375,7 +2375,24 @@ function exportAttendanceToExcel() {
 
     XLSX.writeFile(workbook, fileName);
 }
+  // para que no diga ok cuando sale error
+        async function handleFileUpload(event) {
+  event.preventDefault();
 
+  try {
+    // 1. Intentar subir el archivo al almacenamiento (Firebase Storage / API)
+    await uploadFileToStorage(file);
+
+    // 2. Si fue exitoso, registrar en la base de datos y mostrar éxito
+    alert("Archivo subido con éxito");
+    renderFiles(); 
+
+  } catch (error) {
+    console.error("Error al subir:", error);
+    alert("No se pudo subir el archivo.");
+    return; // <-- IMPORTANTE: Detener la ejecución para que no ejecute el éxito
+  }
+}
 // --- SUBIR ARCHIVO A LA NUBE (CLOUDINTARY) ---
 async function uploadToCloudinary(file) {
     if (!file) return null;
