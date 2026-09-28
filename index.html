@@ -3209,6 +3209,18 @@ function renderSubcategories(subcategories) {
   `).join('');
 }
 
+// --- Renderizado de subcategorías ---
+function renderSubcategories(subcategories = []) {
+  const container = document.getElementById('subcategories-container');
+  if (!container) return;
+
+  container.innerHTML = subcategories.map(sub => `
+    <button onclick="filterBySubcategory('${sub.id}')" class="px-4 py-2 bg-gray-100 hover:bg-indigo-50 text-gray-700 rounded-lg text-sm font-medium transition">
+      ${sub.name}
+    </button>
+  `).join('');
+}
+
 // --- Renderizado de tarjetas de documentos ---
 function renderDocuments(docs) {
   const container = document.getElementById('documents-grid');
@@ -3246,7 +3258,7 @@ function closeModalNotice() {
   if (modal) modal.classList.add('hidden');
 }
 
-// --- Manejador de Archivos (Usando asignación directa para no duplicar 'let') ---
+// --- Manejador de Archivos ---
 window.currentFileBase64 = window.currentFileBase64 || null;
 
 function handleFileSelect(event) {
