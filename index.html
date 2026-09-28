@@ -3306,6 +3306,13 @@ container.innerHTML = itemsToRender.map(doc => `
             uploadIcon.className = "fas fa-file-alt text-green-400 text-3xl mb-2";
         }
     }
+        // Líneas finales reales del archivo (alrededor de la 3110)
+    if (typeof renderRepository === 'function') renderRepository();
+    if (typeof renderFiles === 'function') renderFiles();
+  };
+
+  reader.readAsDataURL(file);
+}
 </script>
 </body>
 </html>
