@@ -2486,12 +2486,7 @@ if (publishForm) {
         const originalBtnText = submitBtn ? submitBtn.innerText : '';
         if (submitBtn) submitBtn.innerText = "Subiendo archivo...";
 
-        // 1. Capturar archivo del formulario
-       const submitBtn = publishForm.querySelector('button[type="submit"]');
-    const originalBtnText = submitBtn ? submitBtn.innerText : '';
-    if (submitBtn) submitBtn.innerText = "Subiendo archivo...";
-
-    // 1. Obtener archivo adjunto
+        // 1. Obtener archivo adjunto
     const fileInput = document.getElementById('publish-file') || document.getElementById('doc-file') || publishForm.querySelector('input[type="file"]');
     const fileToUpload = (fileInput && fileInput.files && fileInput.files[0]) ? fileInput.files[0] : (typeof selectedDocumentFile !== 'undefined' ? selectedDocumentFile : null);
 
