@@ -3198,7 +3198,7 @@ function subirArchivoLocal(event) {
         }
     }
 }
-      // --- Corrección del corte en renderSubcategories ---
+     // --- Corrección del corte en renderSubcategories ---
 function renderSubcategories(subcategories) {
   const container = document.getElementById('subcategories-container');
   if (!container) return;
@@ -3247,8 +3247,8 @@ function closeModalNotice() {
   if (modal) modal.classList.add('hidden');
 }
 
-// --- Manejador de Archivos Local / Base64 ---
-let currentFileBase64 = null;
+// --- Manejador de Archivos (Usando asignación directa para no duplicar 'let') ---
+window.currentFileBase64 = window.currentFileBase64 || null;
 
 function handleFileSelect(event) {
   const file = event.target.files ? event.target.files[0] : (event.dataTransfer ? event.dataTransfer.files[0] : null);
@@ -3256,7 +3256,7 @@ function handleFileSelect(event) {
 
   const reader = new FileReader();
   reader.onload = function(e) {
-    currentFileBase64 = e.target.result;
+    window.currentFileBase64 = e.target.result;
     console.log("Archivo procesado en base64 con éxito.");
   };
   reader.readAsDataURL(file);
@@ -3291,7 +3291,7 @@ function renderAttendanceAdminDashboard(data = []) {
   renderAttendanceCalendar(now.getFullYear(), now.getMonth());
 }
 
-// --- Cierre correcto del script y DOM ---
+// --- Cierre correcto del script ---
 document.addEventListener('DOMContentLoaded', () => {
   renderAttendanceAdminDashboard();
 });
