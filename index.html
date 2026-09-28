@@ -1424,17 +1424,19 @@
     measurementId: "G-3Q5L7CM9T1"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  const auth = getAuth(app);
-  // 2. LÍNEA A AGREGAR (Inicializar el servicio de almacenamiento)
-  const storage = getStorage(app);
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const auth = getAuth(app);
 
-  // Si necesitas exportarlo al ámbito global de la ventana (window):
-  window.storage = storage;
-  window.ref = ref;
-  window.uploadBytes = uploadBytes;
-  window.getDownloadURL = getDownloadURL;
+// 2. Inicializar el servicio de almacenamiento y exponer en window
+const storage = getStorage(app);
+
+window.firebaseAuth = auth;
+window.firebaseStorage = storage;
+window.storageRef = ref;
+window.uploadBytes = uploadBytes;
+window.getDownloadURL = getDownloadURL;
+window.signInWithEmailAndPassword = signInWithEmailAndPassword;
     </script>
     <script>
         // --- APPLICATION GLOBAL STATE ---
