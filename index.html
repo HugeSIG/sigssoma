@@ -887,7 +887,7 @@
                             <h2 class="text-xl sm:text-2xl font-display font-bold text-white">Módulo de Asistencia de Especialistas</h2>
                             <p class="text-xs text-gray-400 mt-1">Sube la evidencia fotográfica y reporte diario de actividades para verificar la presencia en obra.</p>
                         </div>
-                        <div id="attendance-admin-actions" class="hidden flex items-center gap-2">
+                      <div id="attendance-admin-actions-secondary" class="hidden flex items-center gap-2">
                             <button onclick="generateAttendanceReport()" class="bg-amber-600/80 hover:bg-amber-600 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition flex items-center gap-2 border border-amber-400/30">
                                 <i class="fas fa-file-excel"></i>
                                 <span>Exportar Reporte General</span>
@@ -1272,7 +1272,7 @@
                 </div>
 
                 <div class="pt-4 border-t border-white/10 flex justify-end gap-3">
-                    <button type="button" onclick="closeUserModal()" class="px-4 py-2 bg-white/5 hover:bg-white/10 text-xs font-bold text-gray-300 rounded-xl">Cancelar</button>
+                   <button type="button" onclick="document.getElementById('modal-notice').classList.add('hidden')" class="btn-neon px-6 py-2.5 text-xs font-bold text-white rounded-xl bg-red-600 hover:bg-red-700 transition">Entendido</button>
                     <button type="submit" class="btn-neon px-5 py-2 text-xs font-bold text-white rounded-xl">Guardar Usuario</button>
                 </div>
             </form>
@@ -1648,40 +1648,87 @@ documentsDB = documentsDB.map(doc => {
             currentUser = null;
             switchView('view-login');
         }
+function renderSubcategories() {
+    const container = document.getElementById('sidebar-categories');
+    if (!container) return;
+    // Lógica para mostrar categorías de SSO o Ambiental
+    container.innerHTML = `
+        <button onclick="filterByCategory('all')" class="w-full text-left px-3 py-2 rounded-xl text-xs text-white bg-white/10 font-medium">Todos los documentos</button>
+        <button onclick="filterByCategory('normativas')" class="w-full text-left px-3 py-2 rounded-xl text-xs text-gray-400 hover:text-white hover:bg-white/5 font-medium">Normativas y Leyes</button>
+        <button onclick="filterByCategory('formatos')" class="w-full text-left px-3 py-2 rounded-xl text-xs text-gray-400 hover:text-white hover:bg-white/5 font-medium">Formatos Oficiales</button>
+        <button onclick="filterByCategory('planes')" class="w-full text-left px-3 py-2 rounded-xl text-xs text-gray-400 hover:text-white hover:bg-white/5 font-medium">Planes IPERC / PMA</button>
+    `;
+}
 
-      // --- MAIN TABS & SPECIALTY CONTROLLER ---
-        function switchMainTab(tab) {
-            currentMainTab = tab;
-            const btnInicio = document.getElementById('nav-btn-inicio');
-            const btnEspecialidades = document.getElementById('nav-btn-especialidades');
-            const btnAsistencia = document.getElementById('nav-btn-asistencia');
+function renderDocuments() {
+    const grid = document.getElementById('documents-grid');
+    if (!grid) return;
+    
+    const filtered = documentsDB.filter(doc => doc.spec === currentSpecialty && (currentCategory === 'all' || doc.cat === currentCategory));
+    
+    document.getElementById('doc-count-badge').textContent = `${filtered.length} Archivos`;
 
-            const tabInicio = document.getElementById('tab-inicio');
-            const tabEspecialidades = document.getElementById('tab-especialidades');
-            const tabAsistencia = document.getElementById('tab-asistencia');
+    grid.innerHTML = filtered.map(doc => `
+        <div class="glass-card p-4 rounded-2xl border border-white/10 flex flex-col justify-between gap-3">
+            <div>
+                <div class="flex items-center justify-between text-[10px] text-gray-400 mb-1">
+                    <span class="bg-red-600/20 text-red-400 px-2 py-0.5 rounded border border-red-500/20 font-bold">${doc.code}</span>
+                    <span>${doc.date}</span>
+                </div>
+                <h4 class="text-xs font-bold text-white mt-1">${doc.title}</h4>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-white/5">
+                <span class="text-[10px] font-bold text-amber-400">${doc.format}</span>
+                <a href="${doc.url}" target="_blank" class="bg-red-600/80 hover:bg-red-600 text-white text-[11px] px-3 py-1 rounded-lg font-bold transition flex items-center gap-1">
+                    <i class="fas fa-download"></i> Ver / Descargar
+                </a>
+            </div>
+        </div>
+    `).join('');
+}
 
-            // Resetear estilos de todos los botones de navegación
-            [btnInicio, btnEspecialidades, btnAsistencia].forEach(b => {
-                if (b) b.className = "flex-1 sm:flex-none px-4 sm:px-5 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition flex items-center justify-center gap-2";
-            });
+function initAttendanceModule() {
+    const timeElem = document.getElementById('attendance-current-time');
+    if (timeElem) {
+        const now = new Date();
+        timeElem.innerHTML = `<i class="far fa-clock mr-1"></i> ${now.toLocaleTimeString()}`;
+    }
+}
+     // --- MAIN TABS & SPECIALTY CONTROLLER ---
+function switchMainTab(tab) {
+    currentMainTab = tab;
+    const btnInicio = document.getElementById('nav-btn-inicio');
+    const btnEspecialidades = document.getElementById('nav-btn-especialidades');
+    const btnAsistencia = document.getElementById('nav-btn-asistencia');
 
-            // Ocultar todas las pestañas principales
-            [tabInicio, tabEspecialidades, tabAsistencia].forEach(t => {
-                if (t) t.classList.add('hidden');
-            });
+    const tabInicio = document.getElementById('tab-inicio');
+    const tabEspecialidades = document.getElementById('tab-especialidades');
+    const tabAsistencia = document.getElementById('tab-asistencia');
 
-            if (tab === 'inicio') {
-                if (btnInicio) btnInicio.className = "flex-1 sm:flex-none px-4 sm:px-5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 bg-red-600 text-white shadow-md shadow-red-600/30";
-                if (tabInicio) tabInicio.classList.remove('hidden');
-            } else if (tab === 'especialidades') {
-                if (btnEspecialidades) btnEspecialidades.className = "flex-1 sm:flex-none px-4 sm:px-5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 bg-red-600 text-white shadow-md shadow-red-600/30";
-                if (tabEspecialidades) tabEspecialidades.classList.remove('hidden');
-            } else if (tab === 'asistencia') {
-                if (btnAsistencia) btnAsistencia.className = "flex-1 sm:flex-none px-4 sm:px-5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 bg-red-600 text-white shadow-md shadow-red-600/30";
-                if (tabAsistencia) tabAsistencia.classList.remove('hidden');
-                setupAttendanceModule();
-            }
-        }
+    // Clase por defecto (Inactivo)
+    const inactiveClass = "flex-1 sm:flex-none px-4 sm:px-5 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition flex items-center justify-center gap-2";
+    // Clase activa (Resaltado con gradiente/rojo)
+    const activeClass = "flex-1 sm:flex-none px-4 sm:px-5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 bg-red-600 text-white shadow-md shadow-red-600/30";
+
+    // Resetear visibilidad y botones
+    [btnInicio, btnEspecialidades, btnAsistencia].forEach(b => { if (b) b.className = inactiveClass; });
+    [tabInicio, tabEspecialidades, tabAsistencia].forEach(t => { if (t) t.classList.add('hidden'); });
+
+    // Activar pestaña seleccionada
+    if (tab === 'inicio') {
+        if (btnInicio) btnInicio.className = activeClass;
+        if (tabInicio) tabInicio.classList.remove('hidden');
+    } else if (tab === 'especialidades') {
+        if (btnEspecialidades) btnEspecialidades.className = activeClass;
+        if (tabEspecialidades) tabEspecialidades.classList.remove('hidden');
+        renderSubcategories();
+        renderDocuments();
+    } else if (tab === 'asistencia') {
+        if (btnAsistencia) btnAsistencia.className = activeClass;
+        if (tabAsistencia) tabAsistencia.classList.remove('hidden');
+        initAttendanceModule();
+    }
+}
 
         function switchSpecialty(spec) {
             currentSpecialty = spec;
