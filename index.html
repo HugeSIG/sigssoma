@@ -3135,11 +3135,10 @@ function subirArchivoLocal(event) {
         // Si tienes una función para repintar la lista en pantalla, ejecútala aquí:
         if (typeof renderRepository === 'function') renderRepository();
         if (typeof renderFiles === 'function') renderFiles();
-    };
+  };
 
-    reader.readAsDataURL(file);
-}
-// ... otras funciones JavaScript que ya tienes ...
+            reader.readAsDataURL(file);
+        }
 
         // Función para cambiar el texto al seleccionar archivo
         function handleFileSelect(event) {
@@ -3156,7 +3155,7 @@ function subirArchivoLocal(event) {
                     uploadIcon.className = "fas fa-file-alt text-green-400 text-3xl mb-2";
                 }
             }
-            }
+        }
     </script>
 </body>
 </html>
