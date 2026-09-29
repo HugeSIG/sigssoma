@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gobierno Regional de Ayacucho - Sistema SSO y Ambiental</title>
+    <title>Sistema Integrado de Gestión - SSOMA </title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1407,7 +1407,9 @@
             <div id="modal-attendance-photo-desc" class="p-3 bg-black/40 rounded-xl border border-white/10 text-xs text-gray-300"></div>
         </div>
     </div>
-
+<!-- SDKs de Firebase (v9/v10 Compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <!-- FIREBASE INITIALIZATION & AUTH -->
    <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -2162,46 +2164,83 @@ function descargarArchivo(url) {
             document.getElementById('modal-doc').classList.add('hidden');
         }
 
-        function saveDocSubmit(e) {
-            e.preventDefault();
-            const docId = document.getElementById('doc-edit-id').value;
-            const today = new Date().toISOString().split('T')[0];
+       // 1. Configuración de Firebase con tus credenciales
+const firebaseConfig = {
+  apiKey: "AIzaSyAHl9f6orgMFkBgBuk5gZ21vABtmvdFJgk",
+  authDomain: "sigssoma-62daa.firebaseapp.com",
+  projectId: "sigssoma-62daa",
+  storageBucket: "sigssoma-62daa.firebasestorage.app",
+  messagingSenderId: "621311708976",
+  appId: "1:621311708976:web:9dc2fe0b1208029c4402f5"
+};
 
-            const titleVal = document.getElementById('modal-doc-title-input').value.trim();
-            const specVal = document.getElementById('modal-doc-spec').value;
-            const catVal = document.getElementById('modal-doc-cat').value;
-            const formatVal = document.getElementById('modal-doc-format').value;
-            const codeVal = document.getElementById('modal-doc-code').value.trim() || `GRA-${specVal.toUpperCase()}-${Date.now().toString().slice(-4)}`;
-            const descVal = document.getElementById('modal-doc-desc').value.trim();
-
-            if (docId) {
-                const docIndex = documentsDB.findIndex(d => d.id === docId);
-                if (docIndex !== -1) {
-                    documentsDB[docIndex] = { ...documentsDB[docIndex], title: titleVal, spec: specVal, cat: catVal, format: formatVal, code: codeVal, desc: descVal };
-                    showNoticeModal("Documento Actualizado", `El documento "${titleVal}" fue actualizado correctamente.`);
-                }
-            } else {
-                const newDoc = {
-                    id: Date.now().toString(),
-                    title: titleVal,
-                    spec: specVal,
-                    cat: catVal,
-                    format: formatVal,
-                   code: codeVal,
-    date: today,
-    desc: descVal
-  };
-
-  documentsDB.unshift(newDoc);
-  localStorage.setItem('sigssoma_docs', JSON.stringify(documentsDB));
-
-  showNoticeModal("Documento Publicado", `El documento "${titleVal}" ha sido subido con éxito al repositorio.`);
-
-  closeDocModal();
-  renderDocuments();
-  renderAdminFilesTable();
+// Inicializar Firebase
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
 }
+const db = firebase.firestore();
 
+// 2. Configuración de Cloudinary con tus credenciales
+const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dbgjg6uq/upload";
+const CLOUDINARY_UPLOAD_PRESET = "sigssomacloud";
+
+// 3. Función principal de guardado y publicación
+async function saveDocSubmit(e) {
+  if (e) e.preventDefault();
+
+  const fileInput = document.getElementById('documento-file') || document.querySelector('input[type="file"]');
+  const descripcionInput = document.querySelector('textarea') || document.getElementById('file-description');
+
+  const file = fileInput ? fileInput.files[0] : null;
+  const descripcion = descripcionInput ? descripcionInput.value : '';
+
+  if (!file) {
+    alert("Por favor selecciona un archivo antes de publicar.");
+    return;
+  }
+
+  try {
+    console.log("Subiendo archivo a Cloudinary...");
+
+    // A. Crear el formulario para Cloudinary
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+    // B. Subir a Cloudinary via FETCH
+    const cloudRes = await fetch(CLOUDINARY_URL, {
+      method: 'POST',
+      body: formData
+    });
+    
+    const cloudData = await cloudRes.json();
+    
+    if (!cloudRes.ok) {
+      throw new Error(cloudData.error ? cloudData.error.message : "Error al subir a Cloudinary");
+    }
+
+    const fileUrl = cloudData.secure_url;
+    console.log("Archivo subido con éxito a Cloudinary:", fileUrl);
+
+    // C. Guardar registro en Firebase Firestore
+    await db.collection('documentos').add({
+      nombre: file.name,
+      tamano: (file.size / (1024 * 1024)).toFixed(2) + " MB",
+      descripcion: descripcion,
+      url: fileUrl,
+      fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    alert("¡Archivo publicado y guardado exitosamente en la nube!");
+    
+    // Recargar la página para refrescar los cambios
+    location.reload();
+
+  } catch (error) {
+    console.error("Error en el proceso de publicación:", error);
+    alert("Error al publicar el archivo: " + error.message);
+  }
+}
 function confirmDeleteDoc(id) {
             const doc = documentsDB.find(d => d.id === id);
             if (!doc) return;
