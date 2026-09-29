@@ -1789,8 +1789,67 @@ function renderAttendanceAdminDashboard(data = []) {
 
 // Inicialización general al cargar el DOM
 document.addEventListener('DOMContentLoaded', () => {
-  renderAttendanceAdminDashboard();
+    renderAttendanceAdminDashboard();
 });
+});
+      async function saveDocSubmit(e) {
+  if (e) e.preventDefault();
+
+  const fileInput = document.getElementById('documento-file') || document.querySelector('input[type="file"]');
+  const descripcionInput = document.querySelector('textarea') || document.getElementById('file-description');
+
+  const fileToUpload = fileInput ? fileInput.files[0] : null;
+  const descripcion = descripcionInput ? descripcionInput.value : '';
+
+  if (!fileToUpload) {
+    alert("Por favor selecciona un archivo antes de publicar.");
+    return;
+  }
+
+  try {
+    // 1. Prepara FormData para Cloudinary
+    const formData = new FormData();
+    formData.append('file', fileToUpload);
+    formData.append('upload_preset', 'sigssomacloud');
+
+    // 2. Subida a Cloudinary
+    let response = await fetch('https://api.cloudinary.com/v1_1/dbgjg6uq/auto/upload', {
+      method: 'POST',
+      body: formData
+    });
+    let data = await response.json();
+
+    if (!response.ok && data.error && data.error.message && data.error.message.includes('resource_type')) {
+      response = await fetch('https://api.cloudinary.com/v1_1/dbgjg6uq/raw/upload', {
+        method: 'POST',
+        body: formData
+      });
+      data = await response.json();
+    }
+
+    if (!data.secure_url) {
+      throw new Error("No se pudo obtener la URL de Cloudinary");
+    }
+
+    const fileUrl = data.secure_url;
+
+    // 3. Guardar en Firebase Firestore
+    await db.collection('documentos').add({
+      nombre: fileToUpload.name,
+      tamano: (fileToUpload.size / (1024 * 1024)).toFixed(2) + " MB",
+      descripcion: descripcion,
+      url: fileUrl,
+      fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    alert("¡Archivo guardado e integrado correctamente!");
+    location.reload();
+
+  } catch (error) {
+    console.error("Error al publicar:", error);
+    alert("Error al guardar el archivo: " + error.message);
+  }
+}
         function switchSpecialty(spec) {
             currentSpecialty = spec;
             currentCategory = 'all';
