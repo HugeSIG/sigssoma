@@ -3347,6 +3347,21 @@ function handleFileSelect(event) {
     }
   }
 }
-</script>
+// Cargar los documentos guardados en Firebase apenas se abre la página
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof db !== 'undefined') {
+    db.collection('documentos').orderBy('fechaCreacion', 'desc').onSnapshot((snapshot) => {
+      console.log("Documentos recibidos de Firebase:", snapshot.docs.length);
+      
+      // Aquí llama a la función que renderiza tu lista en el HTML
+      // Si tienes una función como renderDocs() o renderizarLista(), colócala aquí:
+      if (typeof renderDocs === 'function') {
+        const docsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderDocs(docsData);
+      }
+    });
+  }
+});
+    </script>
 </body>
 </html>
