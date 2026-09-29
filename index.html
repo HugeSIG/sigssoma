@@ -1787,68 +1787,118 @@ function renderAttendanceAdminDashboard(data = []) {
   renderAttendanceCalendar(now.getFullYear(), now.getMonth());
 }
 
-// Inicialización general al cargar el DOM
+// Inicialización general al cargar el DOM y Firestore en tiempo real
 document.addEventListener('DOMContentLoaded', () => {
-    renderAttendanceAdminDashboard();
-});
-});
-      async function saveDocSubmit(e) {
-  if (e) e.preventDefault();
-
-  const fileInput = document.getElementById('documento-file') || document.querySelector('input[type="file"]');
-  const descripcionInput = document.querySelector('textarea') || document.getElementById('file-description');
-
-  const fileToUpload = fileInput ? fileInput.files[0] : null;
-  const descripcion = descripcionInput ? descripcionInput.value : '';
-
-  if (!fileToUpload) {
-    alert("Por favor selecciona un archivo antes de publicar.");
-    return;
-  }
-
-  try {
-    // 1. Prepara FormData para Cloudinary
-    const formData = new FormData();
-    formData.append('file', fileToUpload);
-    formData.append('upload_preset', 'sigssomacloud');
-
-    // 2. Subida a Cloudinary
-    let response = await fetch('https://api.cloudinary.com/v1_1/dbgjg6uq/auto/upload', {
-      method: 'POST',
-      body: formData
-    });
-    let data = await response.json();
-
-    if (!response.ok && data.error && data.error.message && data.error.message.includes('resource_type')) {
-      response = await fetch('https://api.cloudinary.com/v1_1/dbgjg6uq/raw/upload', {
-        method: 'POST',
-        body: formData
-      });
-      data = await response.json();
+    if (typeof renderAttendanceAdminDashboard === 'function') {
+        renderAttendanceAdminDashboard();
     }
 
-    if (!data.secure_url) {
-      throw new Error("No se pudo obtener la URL de Cloudinary");
+    // Escuchar Firebase Firestore en tiempo real
+    if (typeof db !== 'undefined') {
+        db.collection('documentos').orderBy('fechaCreacion', 'desc').onSnapshot((snapshot) => {
+            const firebaseDocs = snapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    title: data.title || data.nombre || "Documento sin título",
+                    desc: data.desc || data.descripcion || "Sin descripción",
+                    cat: data.cat || data.categoria || "normativas",
+                    spec: data.spec || data.especialidad || "sso",
+                    code: data.code || "DOC-FB",
+                    format: data.format || (data.nombre && data.nombre.toLowerCase().endsWith('.pdf') ? 'PDF' : 'DOCS'),
+                    date: data.date || (data.fechaCreacion ? new Date(data.fechaCreacion.toDate()).toLocaleDateString() : new Date().toLocaleDateString()),
+                    url: data.url || '#'
+                };
+            });
+
+            // Si existe documentsDB, combinamos o reemplazamos con los de Firebase
+            if (typeof documentsDB !== 'undefined') {
+                // Filtramos para conservar los locales por defecto y agregar los de Firebase
+                const idsFirebase = new Set(firebaseDocs.map(d => d.id));
+                const locales = documentsDB.filter(d => !idsFirebase.has(d.id));
+                documentsDB = [...firebaseDocs, ...locales];
+            }
+
+            // Renderizar documentos en pantalla automáticamente
+            if (typeof renderDocuments === 'function') {
+                renderDocuments();
+            }
+        });
+    }
+});
+
+// Función de subida a Cloudinary y Firebase Firestore
+async function saveDocSubmit(e) {
+    if (e) e.preventDefault();
+
+    const fileInput = document.getElementById('documento-file') || document.querySelector('input[type="file"]');
+    const descripcionInput = document.querySelector('textarea') || document.getElementById('file-description');
+    const tituloInput = document.getElementById('file-title') || document.querySelector('input[placeholder*="Título"]');
+    const categoriaSelect = document.getElementById('file-category');
+
+    const fileToUpload = fileInput ? fileInput.files[0] : null;
+    const descripcion = descripcionInput ? descripcionInput.value : '';
+    const titulo = tituloInput ? tituloInput.value : (fileToUpload ? fileToUpload.name : '');
+    const categoria = categoriaSelect ? categoriaSelect.value : (typeof currentCategory !== 'undefined' ? currentCategory : 'normativas');
+    const especialidad = typeof currentSpecialty !== 'undefined' ? currentSpecialty : 'sso';
+
+    if (!fileToUpload) {
+        alert("Por favor selecciona un archivo antes de publicar.");
+        return;
     }
 
-    const fileUrl = data.secure_url;
+    try {
+        // 1. Subida a Cloudinary
+        const formData = new FormData();
+        formData.append('file', fileToUpload);
+        formData.append('upload_preset', 'sigssomacloud');
 
-    // 3. Guardar en Firebase Firestore
-    await db.collection('documentos').add({
-      nombre: fileToUpload.name,
-      tamano: (fileToUpload.size / (1024 * 1024)).toFixed(2) + " MB",
-      descripcion: descripcion,
-      url: fileUrl,
-      fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
-    });
+        let response = await fetch('https://api.cloudinary.com/v1_1/dbgjg6uq/auto/upload', {
+            method: 'POST',
+            body: formData
+        });
+        let data = await response.json();
 
-    alert("¡Archivo guardado e integrado correctamente!");
-    location.reload();
+        if (!response.ok && data.error && data.error.message && data.error.message.includes('resource_type')) {
+            response = await fetch('https://api.cloudinary.com/v1_1/dbgjg6uq/raw/upload', {
+                method: 'POST',
+                body: formData
+            });
+            data = await response.json();
+        }
 
-  } catch (error) {
-    console.error("Error al publicar:", error);
-    alert("Error al guardar el archivo: " + error.message);
-  }
+        if (!data.secure_url) {
+            throw new Error("No se pudo obtener la URL de Cloudinary");
+        }
+
+        const fileUrl = data.secure_url;
+        const ext = fileToUpload.name.split('.').pop().toUpperCase();
+        const formato = ext === 'PDF' ? 'PDF' : (['XLS', 'XLSX'].includes(ext) ? 'EXCEL' : 'WORD');
+
+        // 2. Guardar en Firebase Firestore con la estructura que la UI espera
+        await db.collection('documentos').add({
+            title: titulo,
+            desc: descripcion,
+            nombre: fileToUpload.name,
+            tamano: (fileToUpload.size / (1024 * 1024)).toFixed(2) + " MB",
+            url: fileUrl,
+            cat: categoria === 'all' ? 'normativas' : categoria,
+            spec: especialidad,
+            code: "DOC-" + Math.floor(1000 + Math.random() * 9000),
+            format: formato,
+            date: new Date().toLocaleDateString(),
+            fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert("¡Archivo guardado e integrado correctamente!");
+
+        // Cerrar modal si existe
+        if (typeof closeUploadModal === 'function') closeUploadModal();
+
+    } catch (error) {
+        console.error("Error al publicar:", error);
+        alert("Error al guardar el archivo: " + error.message);
+    }
 }
         function switchSpecialty(spec) {
             currentSpecialty = spec;
